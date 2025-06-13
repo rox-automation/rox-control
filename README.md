@@ -24,7 +24,6 @@ Open in VS Code and select "Reopen in Container" for a pre-configured developmen
 
 ## CI/CD
 
-* **GitLab CI**: Trigger builds by tagging versions (see `.gitlab-ci.yml`)
 * **Local CI**: Run `invoke ci` to test in Docker container
 
 ## Tooling

@@ -1,0 +1,19 @@
+{
+  "template": "https://gitlab.com/roxautomation/templates/python-package",
+  "commit": "32780ef35a95db69a8b80df6fa891e53ccbb4789",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "author_name": "ROX Automation",
+      "author_email": "jev.kuznetsov@gmail.com",
+      "gitlab_path": "rox-automation",
+      "project_name": "rox-control",
+      "project_slug": "rox-control",
+      "package_name": "rox_control",
+      "project_short_description": "Controllers for path following",
+      "_template": "https://gitlab.com/roxautomation/templates/python-package",
+      "_commit": "32780ef35a95db69a8b80df6fa891e53ccbb4789"
+    }
+  },
+  "directory": null
+}

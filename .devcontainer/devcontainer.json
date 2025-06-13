@@ -1,0 +1,35 @@
+{
+  "initializeCommand": "mkdir -p ~/.vscode/container-extensions", // executed on HOST
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "postCreateCommand": ".devcontainer/init_container.sh",
+  "mounts": [
+    "source=${localEnv:HOME}/.vscode/container-extensions,target=/home/dev/.vscode-server/extensions,type=bind,consistency=cached"
+  ],
+  "containerEnv": {
+    "PYTHONPATH": "${containerWorkspaceFolder}/src",
+  },
+  // Features to add to the dev container. More info: https://containers.dev/implementors/features.
+  // "features": {},
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "shardulm94.trailing-spaces",
+        "mhutchie.git-graph",
+        "doi.fileheadercomment",
+        "donjayamanne.githistory",
+        "ms-python.mypy-type-checker",
+        "tamasfe.even-better-toml",
+        "GitHub.copilot",
+        "charliermarsh.ruff",
+        "Gruntfuggly.todo-tree"
+      ]
+    }
+  }
+}
