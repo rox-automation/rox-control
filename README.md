@@ -6,8 +6,8 @@ Controllers for path following
 
 ### Local Development
 ```bash
-# Setup environment
-uv sync --all-extras
+# Create virtual environment
+invoke create-venv
 
 # Run tests
 invoke test
@@ -15,8 +15,7 @@ invoke test
 # Lint and format code
 invoke lint
 
-# Create virtual environment
-invoke create_venv
+
 ```
 
 ### VS Code DevContainer
