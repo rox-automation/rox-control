@@ -16,6 +16,10 @@ Why this repo?
 * main package is contained in `src/rox_control`
 * supporting code (simulator, visualisation etc.) are in `src/tools`. These are not included in the package.
 
+## Typical workflow
+
+1. use simulator ()
+
 
 ## References
 

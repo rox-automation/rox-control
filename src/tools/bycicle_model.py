@@ -63,7 +63,7 @@ class LinearModel:
         self.val = max(self.min_val, min(self.max_val, self.val))
 
 
-class BicycleSim:
+class BicycleModel:
     """
     Bicycle kinematics simulator
 

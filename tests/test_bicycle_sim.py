@@ -7,7 +7,7 @@ Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 
 import math
 
-from tools.bycicle_sim import BicycleSim
+from tools.bycicle_model import BicycleModel
 
 
 class TestBicycleSim:
@@ -22,7 +22,7 @@ class TestBicycleSim:
         This is fundamental for reproducible simulations.
         """
         # Test default initialization
-        sim = BicycleSim()
+        sim = BicycleModel()
         assert sim.wheelbase == 2.5
         assert sim.state.x == 0.0
         assert sim.state.y == 0.0
@@ -33,7 +33,7 @@ class TestBicycleSim:
         assert len(sim.states) == 0
 
         # Test custom initialization
-        sim = BicycleSim(wheelbase=3.0, accel=2.0)
+        sim = BicycleModel(wheelbase=3.0, accel=2.0)
         assert sim.wheelbase == 3.0
 
         # Test reset functionality
@@ -55,7 +55,7 @@ class TestBicycleSim:
         With zero steering angle, the robot should move in a straight line at
         the commanded velocity. This tests the fundamental x-y position integration.
         """
-        sim = BicycleSim(
+        sim = BicycleModel(
             wheelbase=2.0, accel=5.0
         )  # Higher acceleration to reach target faster
         sim.reset()
@@ -91,7 +91,7 @@ class TestBicycleSim:
         a circular path. We can predict the turning radius and verify the
         robot follows the expected circular trajectory.
         """
-        sim = BicycleSim(
+        sim = BicycleModel(
             wheelbase=2.0, accel=5.0, steering_speed=math.radians(90)
         )  # Faster response
         sim.reset()
@@ -130,7 +130,7 @@ class TestBicycleSim:
         to the specified acceleration limit, which is crucial for realistic simulation.
         """
         accel_limit = 1.0  # 1 m/s^2
-        sim = BicycleSim(accel=accel_limit)
+        sim = BicycleModel(accel=accel_limit)
         sim.reset()
 
         # Command high velocity instantly
@@ -160,7 +160,7 @@ class TestBicycleSim:
         rate limit, preventing unrealistic instantaneous steering changes.
         """
         steering_speed = math.radians(45)  # 45 deg/s
-        sim = BicycleSim(steering_speed=steering_speed)
+        sim = BicycleModel(steering_speed=steering_speed)
         sim.reset()
 
         # Command large steering angle instantly
@@ -189,7 +189,7 @@ class TestBicycleSim:
         and controller evaluation. This test verifies that each simulation step
         is properly recorded and that the time progression is correct.
         """
-        sim = BicycleSim()
+        sim = BicycleModel()
         sim.reset()
 
         # Initially no history
@@ -224,7 +224,7 @@ class TestBicycleSim:
         the mathematical bicycle model. We test a specific scenario where we can
         calculate the expected result analytically and compare with simulation.
         """
-        sim = BicycleSim(wheelbase=2.0)
+        sim = BicycleModel(wheelbase=2.0)
         sim.reset()
 
         # Set up a scenario: move at 1 m/s with 45-degree steering
@@ -264,7 +264,7 @@ class TestBicycleSim:
         steering angles that would break the kinematic model.
         """
         max_steering = math.radians(30)
-        sim = BicycleSim(max_steering_angle=max_steering)
+        sim = BicycleModel(max_steering_angle=max_steering)
         sim.reset()
 
         # Try to command steering beyond limits
