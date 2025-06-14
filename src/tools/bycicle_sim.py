@@ -79,6 +79,7 @@ class BicycleSim:
         accel: float = 1.0,
         steering_speed: float = math.radians(45),
         max_steering_angle: float = math.radians(45),
+        max_velocity: float = 10.0,
     ) -> None:
         """
         Args:
@@ -86,11 +87,14 @@ class BicycleSim:
             accel: maximum linear acceleration in m/s^2
             steering_speed: maximum steering angle change in radians per second
             max_steering_angle: maximum steering angle in radians
+            max_velocity: maximum velocity in m/s
         """
 
         self.wheelbase: float = wheelbase
         self.state: RobotState = RobotState()
-        self.velocity_model: LinearModel = LinearModel(roc=accel, val=self.state.v)
+        self.velocity_model: LinearModel = LinearModel(
+            roc=accel, val=self.state.v, min_val=-max_velocity, max_val=max_velocity
+        )
         self.steering_model: LinearModel = LinearModel(
             roc=steering_speed,
             val=self.state.steering_angle,
