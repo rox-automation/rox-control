@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Bycicle kinematics simulator.
+Bicycle kinematics simulator.
 
 Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 """
+
 import math
 from typing import NamedTuple
 
@@ -62,29 +63,32 @@ class LinearModel:
         self.val = max(self.min_val, min(self.max_val, self.val))
 
 
-class BycicleSim:
+class BicycleSim:
     """
-    Bycicle kinematics simulator
+    Bicycle kinematics simulator
 
-    Semi-realistic simulation of a bycicle model with rate-limited steering and velocity changes.
+    Semi-realistic simulation of a bicycle model with rate-limited steering and velocity changes.
 
-    Note: steering angle is modeled as if it moeves with a constant angular velocity. This is a simplification (implies infinite angular acceleration), but makes the simulation a lot easier because we don't need to implement a controller for steering angle.
+    Note: steering angle is modeled as if it moves with a constant angular velocity. This is a simplification (implies infinite angular acceleration), but makes the simulation a lot easier because we don't need to implement a controller for steering angle.
 
     """
 
     def __init__(
         self,
+        wheelbase: float = 2.5,
         accel: float = 1.0,
         steering_speed: float = math.radians(45),
         max_steering_angle: float = math.radians(45),
     ) -> None:
         """
         Args:
+            wheelbase: distance between front and rear axles in meters
             accel: maximum linear acceleration in m/s^2
             steering_speed: maximum steering angle change in radians per second
             max_steering_angle: maximum steering angle in radians
         """
 
+        self.wheelbase: float = wheelbase
         self.state: RobotState = RobotState()
         self.velocity_model: LinearModel = LinearModel(roc=accel, val=self.state.v)
         self.steering_model: LinearModel = LinearModel(
@@ -97,11 +101,36 @@ class BycicleSim:
 
     def set_target_velocity(self, target_velocity: float) -> None:
         """Set target linear velocity"""
-        self.velocity_model._setpoint = target_velocity
+        self.velocity_model.setpoint = target_velocity
 
     def set_target_steering_angle(self, target_angle: float) -> None:
         """Set target steering angle"""
         self.steering_model.setpoint = target_angle
 
+    def reset(
+        self,
+        x: float = 0.0,
+        y: float = 0.0,
+        theta: float = 0.0,
+        v: float = 0.0,
+        steering_angle: float = 0.0,
+    ) -> None:
+        """Reset simulator to initial state"""
+        self.state = RobotState(
+            x=x, y=y, theta=theta, v=v, steering_angle=steering_angle
+        )
+        self.velocity_model.val = v
+        self.velocity_model.setpoint = v
+        self.steering_model.val = steering_angle
+        self.steering_model.setpoint = steering_angle
+        self.states = []
+
     def step(self, dt: float) -> None:
-        """Perform simulation step"""
+        """Perform simulation step
+
+        TODO: Implement bicycle kinematics integration:
+        1. Update velocity_model and steering_model with dt
+        2. Apply bicycle kinematics equations using wheelbase
+        3. Create new RobotState with updated position/orientation
+        4. Append to states history
+        """
