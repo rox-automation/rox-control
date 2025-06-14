@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "rox-control"
 dynamic = ["version"]
 dependencies = [
-    "click",
+    "rox-vectors",
 ]
 description = "Controllers for path following"
 authors = [
@@ -45,8 +45,8 @@ dev = [
 [project.urls]
 Homepage = "https://gitlab.com/rox-automation/rox-control"
 
-[project.scripts]
-rox_control = "rox_control.cli:cli"
+# [project.scripts]
+# rox_control = "rox_control.cli:cli"
 
 
 [tool.setuptools_scm]
