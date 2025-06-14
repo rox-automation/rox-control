@@ -10,30 +10,62 @@ Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 
 import math
 import time
+from dataclasses import dataclass
 
 from tools.bycicle_model import BicycleModel, RobotState
 
 
-def print_states_table(states: list[RobotState], subsample: int = 50) -> None:
-    """Print states in a nicely formatted table"""
-    print(f"{'Time':>6} {'X':>8} {'Y':>8} {'Theta':>8} {'Velocity':>8} {'Steering':>8}")
-    print(f"{'(s)':>6} {'(m)':>8} {'(m)':>8} {'(deg)':>8} {'(m/s)':>8} {'(deg)':>8}")
-    print("-" * 54)
+@dataclass
+class Maneuver:
+    """Defines a single maneuver in the simulation"""
 
-    for i, state in enumerate(states):
-        if i % subsample == 0:  # Print every 10th state (every 1 second)
-            print(
-                f"{state.time:6.1f} {state.x:8.2f} {state.y:8.2f} "
-                f"{math.degrees(state.theta):8.1f} {state.v:8.2f} "
-                f"{math.degrees(state.steering_angle):8.1f}"
-            )
+    name: str
+    duration: float
+    velocity: float
+    steering_deg: float
 
 
-def main() -> None:
-    """Run the basic bicycle simulation example"""
+# Define simulation maneuvers
+MANEUVERS = [
+    Maneuver("Drive straight", 5.0, velocity=5.0, steering_deg=0),
+    Maneuver("Turn left", 3.0, velocity=5.0, steering_deg=20),
+    Maneuver("Turn right", 3.0, velocity=5.0, steering_deg=-20),
+    Maneuver("Stop", 3.0, velocity=0.0, steering_deg=0),
+]
 
-    t_start = time.time()  # Record start time
+SIMULATION_DT = 0.01  # 10ms time step for smooth simulation
 
+
+def run_maneuver(
+    model: BicycleModel,
+    maneuver: Maneuver,
+    dt: float,
+) -> list[RobotState]:
+    """Run a single maneuver for given duration
+
+    Args:
+        model: The bicycle model to simulate
+        maneuver: The maneuver to execute
+        dt: Time step size (seconds)
+
+    Returns:
+        List of robot states during the maneuver
+    """
+    model.set_target_velocity(maneuver.velocity)
+    model.set_target_steering_angle(math.radians(maneuver.steering_deg))
+
+    states = []
+    for _ in range(int(maneuver.duration / dt)):
+        states.append(model.step(dt))
+    return states
+
+
+def run_simulation() -> list[RobotState]:
+    """Run the complete simulation sequence
+
+    Returns:
+        Complete list of robot states throughout simulation
+    """
     # Create a bicycle model with realistic parameters
     model = BicycleModel(
         wheelbase=2.5,  # 2.5m wheelbase (typical car)
@@ -42,43 +74,68 @@ def main() -> None:
         max_steering_angle=math.radians(45),  # 45° max steering
         max_velocity=15.0,  # 15 m/s max velocity
     )
+    all_states = [model.state]  # Start with initial state
 
-    states: list[RobotState] = [model.state]  # Start with initial state
+    print("Running simulation maneuvers:")
+    for maneuver in MANEUVERS:
+        print(f"  {maneuver.name}...")
 
-    dt = 0.01  # 100 ms time step
+        maneuver_states = run_maneuver(
+            model=model,
+            maneuver=maneuver,
+            dt=SIMULATION_DT,
+        )
+        all_states.extend(maneuver_states)
 
-    # Set target velocity
-    model.set_target_velocity(5.0)  # 5 m/s
+    return all_states
 
-    # Drive straight for 5 seconds
-    for _ in range(int(5 / dt)):
-        states.append(model.step(dt))
 
-    # Turn left for 3 seconds
-    model.set_target_steering_angle(math.radians(20))  # 20 degrees left
-    for _ in range(int(3 / dt)):
-        states.append(model.step(dt))
+def print_states_table(states: list[RobotState], subsample: int = 50) -> None:
+    """Print states in a nicely formatted table
 
-    # Turn right for 3 seconds
-    model.set_target_steering_angle(math.radians(-20))  # 20 degrees right
-    for _ in range(int(3 / dt)):
-        states.append(model.step(dt))
+    Args:
+        states: List of robot states to display
+        subsample: Show every Nth state (default: 50)
+    """
+    print(f"{'Time':>6} {'X':>8} {'Y':>8} {'Theta':>8} {'Velocity':>8} {'Steering':>8}")
+    print(f"{'(s)':>6} {'(m)':>8} {'(m)':>8} {'(deg)':>8} {'(m/s)':>8} {'(deg)':>8}")
+    print("-" * 54)
 
-    # Go straight and decelerate to stop
-    model.set_target_steering_angle(0.0)  # Straight steering
-    model.set_target_velocity(0.0)  # Stop
-    for _ in range(int(3 / dt)):
-        states.append(model.step(dt))
+    for i, state in enumerate(states):
+        if i % subsample == 0:
+            print(
+                f"{state.time:6.1f} {state.x:8.2f} {state.y:8.2f} "
+                f"{math.degrees(state.theta):8.1f} {state.v:8.2f} "
+                f"{math.degrees(state.steering_angle):8.1f}"
+            )
 
-    t_end = time.time()  # Record end time
-    # Print results
-    print("Bicycle Model Simulation Results")
+
+def present_results(states: list[RobotState], execution_time: float) -> None:
+    """Present simulation results in a formatted way
+
+    Args:
+        states: Complete list of robot states from simulation
+        execution_time: How long the simulation took to run (seconds)
+    """
+    print("\nBicycle Model Simulation Results")
     print("=" * 54)
     print_states_table(states)
 
-    print(f"\nSimulation completed in {t_end - t_start:.3f} seconds")
-    print(f"Final position: ({states[-1].x:.2f}, {states[-1].y:.2f})")
-    print(f"Total sim time {states[-1].time:.2f} seconds")
+    final_state = states[-1]
+    print(f"\nSimulation completed in {execution_time:.3f} seconds")
+    print(f"Final position: ({final_state.x:.2f}, {final_state.y:.2f})")
+    print(f"Total simulation time: {final_state.time:.2f} seconds")
+    print(f"States generated: {len(states)}")
+
+
+def main() -> None:
+    """Run the basic bicycle simulation example"""
+    t_start = time.time()
+
+    states = run_simulation()
+
+    t_end = time.time()
+    present_results(states, t_end - t_start)
 
 
 if __name__ == "__main__":
