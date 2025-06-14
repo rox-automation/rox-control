@@ -126,11 +126,41 @@ class BicycleSim:
         self.states = []
 
     def step(self, dt: float) -> None:
-        """Perform simulation step
+        """Perform simulation step using bicycle kinematics"""
+        # Update linear models with time step
+        self.velocity_model.step(dt)
+        self.steering_model.step(dt)
 
-        TODO: Implement bicycle kinematics integration:
-        1. Update velocity_model and steering_model with dt
-        2. Apply bicycle kinematics equations using wheelbase
-        3. Create new RobotState with updated position/orientation
-        4. Append to states history
-        """
+        # Get current state values
+        v = self.velocity_model.val
+        phi = self.steering_model.val
+        x, y, theta = self.state.x, self.state.y, self.state.theta
+
+        # Apply bicycle kinematics (forward integration)
+        # ẋ = v cos(θ)
+        # ẏ = v sin(θ)
+        # θ̇ = (v/l) tan(φ)
+        x_dot = v * math.cos(theta)
+        y_dot = v * math.sin(theta)
+        theta_dot = (v / self.wheelbase) * math.tan(phi)
+
+        # Integrate position and orientation
+        new_x = x + x_dot * dt
+        new_y = y + y_dot * dt
+        new_theta = theta + theta_dot * dt
+
+        # Update simulation time
+        new_time = self.state.time + dt
+
+        # Create new state
+        self.state = RobotState(
+            x=new_x,
+            y=new_y,
+            theta=new_theta,
+            v=v,
+            steering_angle=phi,
+            time=new_time,
+        )
+
+        # Store state history
+        self.states.append(self.state)
