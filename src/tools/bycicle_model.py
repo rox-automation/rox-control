@@ -65,9 +65,9 @@ class LinearModel:
 
 class BicycleModel:
     """
-    Bicycle kinematics simulator
+    Bicycle kinematics model
 
-    Semi-realistic simulation of a bicycle model with rate-limited steering and velocity changes.
+    Models a bicycle with rate-limited steering and velocity changes.
 
     Note: steering angle is modeled as if it moves with a constant angular velocity. This is a simplification (implies infinite angular acceleration), but makes the simulation a lot easier because we don't need to implement a controller for steering angle.
 
@@ -101,7 +101,6 @@ class BicycleModel:
             min_val=-max_steering_angle,
             max_val=max_steering_angle,
         )
-        self.states: list[RobotState] = []
 
     def set_target_velocity(self, target_velocity: float) -> None:
         """Set target linear velocity"""
@@ -119,7 +118,7 @@ class BicycleModel:
         v: float = 0.0,
         steering_angle: float = 0.0,
     ) -> None:
-        """Reset simulator to initial state"""
+        """Reset model to initial state"""
         self.state = RobotState(
             x=x, y=y, theta=theta, v=v, steering_angle=steering_angle
         )
@@ -127,10 +126,16 @@ class BicycleModel:
         self.velocity_model.setpoint = v
         self.steering_model.val = steering_angle
         self.steering_model.setpoint = steering_angle
-        self.states = []
 
-    def step(self, dt: float) -> None:
-        """Perform simulation step using bicycle kinematics"""
+    def step(self, dt: float) -> RobotState:
+        """Perform simulation step using bicycle kinematics
+
+        Args:
+            dt: Time step in seconds
+
+        Returns:
+            Updated robot state after the time step
+        """
         # Update linear models with time step
         self.velocity_model.step(dt)
         self.steering_model.step(dt)
@@ -166,5 +171,4 @@ class BicycleModel:
             time=new_time,
         )
 
-        # Store state history
-        self.states.append(self.state)
+        return self.state

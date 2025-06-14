@@ -30,8 +30,6 @@ class TestBicycleSim:
         assert sim.state.v == 0.0
         assert sim.state.steering_angle == 0.0
         assert sim.state.time == 0.0
-        assert len(sim.states) == 0
-
         # Test custom initialization
         sim = BicycleModel(wheelbase=3.0, accel=2.0)
         assert sim.wheelbase == 3.0
@@ -45,7 +43,6 @@ class TestBicycleSim:
         assert sim.state.steering_angle == 0.1
         assert sim.velocity_model.val == 5.0
         assert sim.steering_model.val == 0.1
-        assert len(sim.states) == 0
 
     def test_straight_line_motion(self) -> None:
         """
@@ -181,40 +178,48 @@ class TestBicycleSim:
         # Should be close to target angle now
         assert abs(sim.state.steering_angle - target_angle) < 0.1
 
-    def test_state_history_tracking(self) -> None:
+    def test_step_return_value(self) -> None:
         """
-        Test that the simulator correctly tracks state history over time.
+        Test that the step() method returns the updated state.
 
-        Rationale: State history is essential for trajectory analysis, plotting,
-        and controller evaluation. This test verifies that each simulation step
-        is properly recorded and that the time progression is correct.
+        Rationale: The new API design has step() return the state instead of
+        storing it internally. This test verifies that the returned state
+        contains the correct updated values and progresses over time.
         """
         sim = BicycleModel()
         sim.reset()
 
-        # Initially no history
-        assert len(sim.states) == 0
+        # Set some motion commands
+        sim.set_target_velocity(1.0)
+        sim.set_target_steering_angle(0.1)
 
-        # Run several simulation steps
         dt = 0.1
-        num_steps = 10
+        initial_state = sim.state
 
-        for i in range(num_steps):
-            sim.step(dt)
+        # Take a step and verify return value
+        new_state = sim.step(dt)
 
-            # Check that history is growing
-            assert len(sim.states) == i + 1
+        # Step should return a RobotState
+        assert isinstance(new_state, type(initial_state))
 
-            # Check that time is progressing correctly
-            expected_time = (i + 1) * dt
-            assert abs(sim.states[i].time - expected_time) < 0.001
+        # Time should have progressed
+        assert new_state.time == initial_state.time + dt
 
-        # Verify that states are different (robot is moving)
-        assert sim.states[0] != sim.states[-1]
+        # Internal state should match returned state
+        assert sim.state == new_state
 
-        # Test that reset clears history
-        sim.reset()
-        assert len(sim.states) == 0
+        # Take multiple steps and verify progression
+        states = []
+        for i in range(5):
+            state = sim.step(dt)
+            states.append(state)
+
+            # Time should progress correctly
+            expected_time = (i + 2) * dt  # +2 because we already took one step
+            assert abs(state.time - expected_time) < 0.001
+
+        # Verify states are different (robot is moving)
+        assert states[0] != states[-1]
 
     def test_bicycle_kinematics_accuracy(self) -> None:
         """
