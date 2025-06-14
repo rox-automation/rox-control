@@ -41,16 +41,7 @@ def run_maneuver(
     maneuver: Maneuver,
     dt: float,
 ) -> list[RobotState]:
-    """Run a single maneuver for given duration
-
-    Args:
-        model: The bicycle model to simulate
-        maneuver: The maneuver to execute
-        dt: Time step size (seconds)
-
-    Returns:
-        List of robot states during the maneuver
-    """
+    """Run a single maneuver for given duration."""
     model.set_target_velocity(maneuver.velocity)
     model.set_target_steering_angle(math.radians(maneuver.steering_deg))
 
@@ -61,11 +52,7 @@ def run_maneuver(
 
 
 def run_simulation() -> list[RobotState]:
-    """Run the complete simulation sequence
-
-    Returns:
-        Complete list of robot states throughout simulation
-    """
+    """Run the complete simulation sequence."""
     # Create a bicycle model with realistic parameters
     model = BicycleModel(
         wheelbase=2.5,  # 2.5m wheelbase (typical car)
@@ -91,12 +78,7 @@ def run_simulation() -> list[RobotState]:
 
 
 def print_states_table(states: list[RobotState], subsample: int = 50) -> None:
-    """Print states in a nicely formatted table
-
-    Args:
-        states: List of robot states to display
-        subsample: Show every Nth state (default: 50)
-    """
+    """Print states in a nicely formatted table."""
     print(f"{'Time':>6} {'X':>8} {'Y':>8} {'Theta':>8} {'Velocity':>8} {'Steering':>8}")
     print(f"{'(s)':>6} {'(m)':>8} {'(m)':>8} {'(deg)':>8} {'(m/s)':>8} {'(deg)':>8}")
     print("-" * 54)
@@ -111,12 +93,7 @@ def print_states_table(states: list[RobotState], subsample: int = 50) -> None:
 
 
 def present_results(states: list[RobotState], execution_time: float) -> None:
-    """Present simulation results in a formatted way
-
-    Args:
-        states: Complete list of robot states from simulation
-        execution_time: How long the simulation took to run (seconds)
-    """
+    """Present simulation results in a formatted way."""
     print("\nBicycle Model Simulation Results")
     print("=" * 54)
     print_states_table(states)
@@ -129,7 +106,7 @@ def present_results(states: list[RobotState], execution_time: float) -> None:
 
 
 def main() -> None:
-    """Run the basic bicycle simulation example"""
+    """Run the basic bicycle simulation example."""
     t_start = time.time()
 
     states = run_simulation()
