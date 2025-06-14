@@ -3,6 +3,8 @@
 
 # auto generated files
 
+# external files
+temp/external/
 
 # build files
 docker/src/
