@@ -14,6 +14,8 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 
+from rox_control.tracks import Track
+
 from .bicicle_model import BicycleModel, RobotState
 
 
@@ -67,17 +69,20 @@ def extract_trajectory_data(
     }
 
 
-def plot_simulation_results(states: list[RobotState], model: BicycleModel) -> None:
+def plot_simulation_results(
+    states: list[RobotState], model: BicycleModel, track: Track | None = None
+) -> None:
     """
     Plot simulation results showing trajectory and time series data.
 
     Creates a 2-column layout:
-    - Left: xy trajectory with rear and front wheel traces
+    - Left: xy trajectory with rear and front wheel traces and track waypoints
     - Right: upper plot (steering angle vs time), lower plot (velocity vs time)
 
     Args:
         states: List of robot states from simulation
         model: BicycleModel instance used for the simulation
+        track: Optional track to visualize waypoints in black
     """
     if not states:
         print("Warning: No states provided for plotting")
@@ -90,7 +95,7 @@ def plot_simulation_results(states: list[RobotState], model: BicycleModel) -> No
     fig, (ax_traj, ax_time_container) = plt.subplots(1, 2, figsize=(15, 6))
 
     # Left panel: Trajectory plot
-    _plot_trajectory(ax_traj, data)
+    _plot_trajectory(ax_traj, data, track)
 
     # Right panel: Time series plots (2 stacked subplots)
     _plot_time_series(ax_time_container, data, fig)
@@ -100,14 +105,23 @@ def plot_simulation_results(states: list[RobotState], model: BicycleModel) -> No
     plt.tight_layout()
 
 
-def _plot_trajectory(ax: plt.Axes, data: dict[str, Any]) -> None:
-    """Plot trajectory with rear and front wheel traces."""
+def _plot_trajectory(
+    ax: plt.Axes, data: dict[str, Any], track: Track | None = None
+) -> None:
+    """Plot trajectory with rear and front wheel traces and optional track."""
     if not data["rear_trajectory"]:
         return
 
     # Extract coordinates
     rear_x, rear_y = zip(*data["rear_trajectory"], strict=False)
     front_x, front_y = zip(*data["front_trajectory"], strict=False)
+
+    # Plot track waypoints first (so they appear behind the trajectory)
+    if track is not None:
+        track_x = [waypoint.x for waypoint in track.data]
+        track_y = [waypoint.y for waypoint in track.data]
+        ax.plot(track_x, track_y, "k-", linewidth=3, label="Track", alpha=0.7)
+        ax.plot(track_x, track_y, "ko", markersize=6, alpha=0.7)
 
     # Plot trajectories
     ax.plot(rear_x, rear_y, "b-", linewidth=2, label="Rear Wheel", alpha=0.8)
@@ -117,9 +131,15 @@ def _plot_trajectory(ax: plt.Axes, data: dict[str, Any]) -> None:
     ax.plot(rear_x[0], rear_y[0], "go", markersize=8, label="Start")
     ax.plot(rear_x[-1], rear_y[-1], "ro", markersize=8, label="End")
 
-    # Calculate bounds with padding
+    # Calculate bounds with padding (include track waypoints if present)
     all_x = list(rear_x) + list(front_x)
     all_y = list(rear_y) + list(front_y)
+
+    if track is not None:
+        track_x = [waypoint.x for waypoint in track.data]
+        track_y = [waypoint.y for waypoint in track.data]
+        all_x.extend(track_x)
+        all_y.extend(track_y)
     x_range = max(all_x) - min(all_x)
     y_range = max(all_y) - min(all_y)
     padding = max(x_range, y_range) * 0.1 + 1.0  # Minimum 1m padding

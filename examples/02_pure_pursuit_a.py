@@ -107,7 +107,7 @@ def main() -> None:
 
         from tools.plot import plot_simulation_results
 
-        plot_simulation_results(states, model)
+        plot_simulation_results(states, model, track)
         plt.show()
         print("Plots displayed successfully!")
 
