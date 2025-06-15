@@ -29,31 +29,12 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
 * [feat_004] ✅ **COMPLETED** - Track generator functions in [`src/tools/tracks.py`](src/tools/tracks.py) with tests in [`tests/test_track_generators.py`](tests/test_track_generators.py)
 
 * [feat_005] ✅ **COMPLETED** - Pure pursuit A controller in [`src/rox_control/controllers/pure_pursuit_a.py`](src/rox_control/controllers/pure_pursuit_a.py) with tests in [`tests/test_controllers.py`](tests/test_controllers.py)
-    - **Class-based design:** `PurePursuitA` with clean stateful interface  
-    - **Constructor parameters:**
-      - `look_ahead_distance: float = 0.2` - lookahead distance for target calculation
-      - `velocity_vector_length: float = 0.1` - robot velocity projection length
-      - `proportional_gain: float = 1.0` - steering control gain
-      - `target_speed: float = 0.1` - desired robot velocity
-    - **Core interface:**
-      - `set_track(track: Track)` - assign track for controller to follow
-      - `control(robot_state: RobotState) -> ControlOutput` - returns structured control data
-    - **ControlOutput dataclass:**
-      - `curvature: float` - steering command (essential)
-      - `velocity: float` - speed command (essential)
-      - `target_point: Vector` - target point for visualization
-      - `future_position: Vector` - projected robot position
-      - `angle_error: float` - pure pursuit angle error for debugging
-      - `track_complete: bool` - whether track following is finished
-    - **Algorithm:** Velocity-projected pure pursuit with proportional control
-      - Projects robot future position using velocity vector
-      - Projects onto current waypoint segment using `point_on_line`
-      - Adds fixed lookahead distance along path direction
-      - Uses proportional gain on angle error for curvature output
-    - **Module structure:** Controllers organized in `src/rox_control/controllers/` directory
-      - Each controller implemented in separate file with own `Controller` class
-      - Exported as descriptive names via `__init__.py` (e.g., `PurePursuitA`)
-      - Shared `ControlOutput` dataclass for consistent interface
+
+* [feat_006] - example of Pure Pursuit A controller in `examples/02_pure_pursuit_a.py`:
+  - run simulation and display resulting plot
+  - use square track (20x5 meters)
+  - the code should function like `temp/external/python-robotics/examples/pure_pursuit/pure_pursuit_2.py`, but use code implementeed in features 3,4,5.
+  - example should look like `examples/01_basic_simulation.py`. Use similar style. Avoid duplicating code, if required, move to separate module, in `tools`. For example `present_results` function is a good candidate.
 
 **Architectural Considerations:**
 - **Module Organization:** ✅ Controllers organized in `src/rox_control/controllers/` directory structure
@@ -64,7 +45,7 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
   - Core library features have full test coverage (empty tracks, single waypoint, malformed data)
   - Code in `tools` may have less strict testing requirements
 - **Type Safety:** ✅ Full mypy compliance achieved with proper type annotations
-- **Documentation:** ✅ Descriptive docstrings added for all classes and non-trivial functions
+- **Documentation:** ✅ One-line docstrings added for all classes and non-trivial functions
 
 
 
