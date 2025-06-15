@@ -9,8 +9,8 @@ from rox_vectors.vectors import point_on_line
 
 from rox_control.tracks import Track
 
-if TYPE_CHECKING:
-    from tools.bycicle_model import RobotState
+if TYPE_CHECKING:  # pragma: no cover
+    from tools.bicicle_model import RobotState
 
 
 @dataclass

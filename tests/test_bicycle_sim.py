@@ -7,7 +7,7 @@ Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 
 import math
 
-from tools.bycicle_model import BicycleModel, RobotState
+from tools.bicicle_model import BicycleModel, RobotState
 
 
 class TestBicycleSim:
@@ -592,3 +592,182 @@ class TestBicycleSim:
                 (proj_x[-1] - front_x) ** 2 + (proj_y[-1] - front_y) ** 2
             )
             assert abs(actual_distance - distance) < 0.1
+
+    def test_set_control_command_zero_curvature(self) -> None:
+        """Test set_control_command with zero curvature (straight line motion)."""
+        sim = BicycleModel(wheelbase=2.5)
+
+        # Command straight line motion
+        curvature = 0.0
+        velocity = 5.0
+        sim.set_control_command(curvature, velocity)
+
+        # Should set velocity target
+        assert sim.velocity_model.setpoint == velocity
+
+        # Should set steering angle to zero
+        assert abs(sim.steering_model.setpoint) < 0.001
+
+    def test_set_control_command_positive_curvature(self) -> None:
+        """Test set_control_command with positive curvature (left turn)."""
+        wheelbase = 2.0
+        sim = BicycleModel(wheelbase=wheelbase)
+
+        # Command left turn: curvature = 1/radius
+        radius = 10.0  # 10m turn radius
+        curvature = 1.0 / radius  # 0.1 rad/m
+        velocity = 3.0
+        sim.set_control_command(curvature, velocity)
+
+        # Should set velocity target
+        assert sim.velocity_model.setpoint == velocity
+
+        # Should calculate correct steering angle: δ = arctan(κ * L)
+        expected_steering = math.atan(curvature * wheelbase)
+        assert abs(sim.steering_model.setpoint - expected_steering) < 0.001
+
+    def test_set_control_command_negative_curvature(self) -> None:
+        """Test set_control_command with negative curvature (right turn)."""
+        wheelbase = 2.5
+        sim = BicycleModel(wheelbase=wheelbase)
+
+        # Command right turn
+        radius = 8.0
+        curvature = -1.0 / radius  # Negative for right turn
+        velocity = 4.0
+        sim.set_control_command(curvature, velocity)
+
+        # Should set velocity target
+        assert sim.velocity_model.setpoint == velocity
+
+        # Should calculate correct negative steering angle
+        expected_steering = math.atan(curvature * wheelbase)
+        assert abs(sim.steering_model.setpoint - expected_steering) < 0.001
+        assert sim.steering_model.setpoint < 0  # Should be negative
+
+    def test_set_control_command_high_curvature(self) -> None:
+        """Test set_control_command with high curvature (tight turn)."""
+        wheelbase = 2.0
+        max_steering = math.radians(45)
+        sim = BicycleModel(wheelbase=wheelbase, max_steering_angle=max_steering)
+
+        # Command very tight turn
+        radius = 1.0  # 1m turn radius (very tight)
+        curvature = 1.0 / radius
+        velocity = 2.0
+        sim.set_control_command(curvature, velocity)
+
+        # Should set velocity target
+        assert sim.velocity_model.setpoint == velocity
+
+        # atan(1.0 * 2.0) = atan(2.0) ≈ 63.4° > 45° max, so should be clamped
+
+        # Should be clamped to max_steering_angle by LinearModel
+        assert abs(sim.steering_model.setpoint) <= max_steering + 0.001
+        assert sim.steering_model.setpoint == max_steering  # Should be exactly at limit
+
+    def test_set_control_command_kinematics_equivalence(self) -> None:
+        """Test that set_control_command produces equivalent motion to manual setting."""
+        wheelbase = 2.5
+        sim1 = BicycleModel(
+            wheelbase=wheelbase, accel=10.0, steering_speed=math.radians(180)
+        )
+        sim2 = BicycleModel(
+            wheelbase=wheelbase, accel=10.0, steering_speed=math.radians(180)
+        )
+
+        # Set initial conditions
+        initial_state = RobotState(x=1.0, y=2.0, theta=math.pi / 6)
+        sim1.state = initial_state
+        sim2.state = initial_state
+
+        # Test scenario: moderate turn
+        radius = 5.0
+        curvature = 1.0 / radius
+        velocity = 6.0
+        steering_angle = math.atan(curvature * wheelbase)
+
+        # Method 1: Use set_control_command
+        sim1.set_control_command(curvature, velocity)
+
+        # Method 2: Set velocity and steering manually
+        sim2.set_target_velocity(velocity)
+        sim2.set_target_steering_angle(steering_angle)
+
+        # Run simulation for several steps
+        dt = 0.01
+        for _ in range(200):  # 2 seconds, enough to reach steady state
+            sim1.step(dt)
+            sim2.step(dt)
+
+        # Final states should be nearly identical
+        state1 = sim1.state
+        state2 = sim2.state
+
+        assert abs(state1.x - state2.x) < 0.01
+        assert abs(state1.y - state2.y) < 0.01
+        assert abs(state1.theta - state2.theta) < 0.01
+        assert abs(state1.v - state2.v) < 0.01
+        assert abs(state1.steering_angle - state2.steering_angle) < 0.01
+
+    def test_set_control_command_zero_velocity(self) -> None:
+        """Test set_control_command with zero velocity (stationary)."""
+        sim = BicycleModel(wheelbase=2.0)
+
+        # Command stationary with some curvature
+        curvature = 0.5  # Arbitrary curvature
+        velocity = 0.0
+        sim.set_control_command(curvature, velocity)
+
+        # Should set zero velocity
+        assert sim.velocity_model.setpoint == 0.0
+
+        # Should still calculate steering angle (for preparation)
+        expected_steering = math.atan(curvature * sim.wheelbase)
+        assert abs(sim.steering_model.setpoint - expected_steering) < 0.001
+
+    def test_set_control_command_bicycle_kinematics_formula(self) -> None:
+        """Test the bicycle kinematics conversion formula used in set_control_command."""
+        test_cases = [
+            # (wheelbase, curvature, expected_steering_angle)
+            (2.0, 0.0, 0.0),  # Straight line
+            (2.0, 0.1, math.atan(0.2)),  # curvature * wheelbase = 0.2
+            (2.5, 0.2, math.atan(0.5)),  # curvature * wheelbase = 0.5
+            (3.0, 1.0, math.atan(3.0)),  # curvature * wheelbase = 3.0
+            (2.0, -0.25, math.atan(-0.5)),  # Negative curvature
+        ]
+
+        for wheelbase, curvature, expected_steering in test_cases:
+            sim = BicycleModel(wheelbase=wheelbase, max_steering_angle=math.radians(90))
+            sim.set_control_command(
+                curvature, 1.0
+            )  # Velocity doesn't matter for this test
+
+            assert abs(sim.steering_model.setpoint - expected_steering) < 0.001, (
+                f"Failed for wheelbase={wheelbase}, curvature={curvature}"
+            )
+
+    def test_set_control_command_with_steering_limits(self) -> None:
+        """Test set_control_command respects steering angle limits."""
+        wheelbase = 2.0
+        max_steering = math.radians(30)  # 30 degree limit
+        sim = BicycleModel(wheelbase=wheelbase, max_steering_angle=max_steering)
+
+        # Command curvature that would exceed steering limits
+        # For 30° max: max_curvature = tan(30°) / wheelbase = tan(π/6) / 2.0
+        max_curvature = math.tan(max_steering) / wheelbase
+        excessive_curvature = max_curvature * 2.0  # Double the limit
+
+        sim.set_control_command(excessive_curvature, 5.0)
+
+        # Setpoint should be clamped by LinearModel limits
+        expected_steering = math.atan(
+            excessive_curvature * wheelbase
+        )  # Unclamped value
+        actual_setpoint = sim.steering_model.setpoint
+
+        # The setpoint should be limited to max_steering_angle
+        assert abs(actual_setpoint) <= max_steering + 0.001
+        assert (
+            actual_setpoint != expected_steering
+        )  # Should be different due to clamping

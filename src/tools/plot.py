@@ -14,7 +14,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 
-from .bycicle_model import BicycleModel, RobotState
+from .bicicle_model import BicycleModel, RobotState
 
 
 def extract_trajectory_data(

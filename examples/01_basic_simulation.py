@@ -12,7 +12,7 @@ import math
 import time
 from dataclasses import dataclass
 
-from tools.bycicle_model import BicycleModel, RobotState
+from tools.bicicle_model import BicycleModel, RobotState
 
 
 @dataclass

@@ -112,6 +112,24 @@ class BicycleModel:
         """Set target steering angle"""
         self.steering_model.setpoint = target_angle
 
+    def set_control_command(self, curvature: float, velocity: float) -> None:
+        """Set control command using curvature and velocity.
+
+        Converts curvature to steering angle using bicycle kinematics:
+        steering_angle = arctan(curvature * wheelbase)
+
+        Args:
+            curvature: Desired path curvature (1/radius) in rad/m
+            velocity: Desired linear velocity in m/s
+        """
+        # Convert curvature to steering angle using bicycle kinematics
+        # κ = tan(δ) / L  =>  δ = arctan(κ * L)
+        steering_angle = math.atan(curvature * self.wheelbase)
+
+        # Set both commands
+        self.set_target_velocity(velocity)
+        self.set_target_steering_angle(steering_angle)
+
     def step(self, dt: float) -> RobotState:
         """Perform simulation step using bicycle kinematics
 
