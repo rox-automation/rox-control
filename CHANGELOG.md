@@ -16,6 +16,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Private `_next_idx` attribute for internal state management
   - Comprehensive test suite with 20 test cases covering edge cases
   - 100% test coverage (26/26 statements)
+- **Track generator functions** (feat_004)
+  - Main `generate_track(track_type: str, **kwargs) -> Track` function
+  - Square track generation with configurable size and resolution parameters
+  - Circular track generation with radius, center, and resolution options
+  - Figure-8 track generation with size and resolution parameters
+  - Optional `spacing` parameter for consistent waypoint spacing between all track types
+  - Parameter validation with clear error messages for invalid inputs
+  - Full integration with existing Track class from feat_003
+  - Comprehensive test suite with 25 test cases covering all track types and edge cases
+  - 99% test coverage (84/85 statements)
 
 ## [0.1.0] - 2025-06-15
 
