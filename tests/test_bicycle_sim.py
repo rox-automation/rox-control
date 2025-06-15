@@ -7,7 +7,7 @@ Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 
 import math
 
-from tools.bycicle_model import BicycleModel
+from tools.bycicle_model import BicycleModel, RobotState
 
 
 class TestBicycleSim:
@@ -34,8 +34,12 @@ class TestBicycleSim:
         sim = BicycleModel(wheelbase=3.0, accel=2.0)
         assert sim.wheelbase == 3.0
 
-        # Test reset functionality
-        sim.reset(x=1.0, y=2.0, theta=math.pi / 4, v=5.0, steering_angle=0.1)
+        # Test state assignment functionality
+        sim.state = RobotState(x=1.0, y=2.0, theta=math.pi / 4, v=5.0, steering_angle=0.1)
+        sim.velocity_model.val = 5.0
+        sim.velocity_model.setpoint = 5.0
+        sim.steering_model.val = 0.1
+        sim.steering_model.setpoint = 0.1
         assert sim.state.x == 1.0
         assert sim.state.y == 2.0
         assert sim.state.theta == math.pi / 4
@@ -55,7 +59,7 @@ class TestBicycleSim:
         sim = BicycleModel(
             wheelbase=2.0, accel=5.0
         )  # Higher acceleration to reach target faster
-        sim.reset()
+        sim.state = RobotState()
 
         # Set target velocity but no steering
         sim.set_target_velocity(2.0)
@@ -91,7 +95,7 @@ class TestBicycleSim:
         sim = BicycleModel(
             wheelbase=2.0, accel=5.0, steering_speed=math.radians(90)
         )  # Faster response
-        sim.reset()
+        sim.state = RobotState()
 
         # Set constant velocity and steering angle
         velocity = 1.0
@@ -128,7 +132,7 @@ class TestBicycleSim:
         """
         accel_limit = 1.0  # 1 m/s^2
         sim = BicycleModel(accel=accel_limit)
-        sim.reset()
+        sim.state = RobotState()
 
         # Command high velocity instantly
         target_velocity = 5.0
@@ -158,7 +162,7 @@ class TestBicycleSim:
         """
         steering_speed = math.radians(45)  # 45 deg/s
         sim = BicycleModel(steering_speed=steering_speed)
-        sim.reset()
+        sim.state = RobotState()
 
         # Command large steering angle instantly
         target_angle = math.radians(30)
@@ -187,7 +191,7 @@ class TestBicycleSim:
         contains the correct updated values and progresses over time.
         """
         sim = BicycleModel()
-        sim.reset()
+        sim.state = RobotState()
 
         # Set some motion commands
         sim.set_target_velocity(1.0)
@@ -230,7 +234,7 @@ class TestBicycleSim:
         calculate the expected result analytically and compare with simulation.
         """
         sim = BicycleModel(wheelbase=2.0)
-        sim.reset()
+        sim.state = RobotState()
 
         # Set up a scenario: move at 1 m/s with 45-degree steering
         velocity = 1.0
@@ -270,7 +274,7 @@ class TestBicycleSim:
         """
         max_steering = math.radians(30)
         sim = BicycleModel(max_steering_angle=max_steering)
-        sim.reset()
+        sim.state = RobotState()
 
         # Try to command steering beyond limits
         excessive_angle = math.radians(60)
@@ -303,25 +307,25 @@ class TestBicycleSim:
         sim = BicycleModel(wheelbase=wheelbase)
 
         # Test facing east (0 radians) at origin
-        sim.reset(x=0, y=0, theta=0)
+        sim.state = RobotState(x=0, y=0, theta=0)
         front_x, front_y = sim.get_front_wheel_pos()
         assert abs(front_x - wheelbase) < 0.001  # Should be wheelbase ahead in x
         assert abs(front_y - 0.0) < 0.001  # Should be at same y
 
         # Test facing north (π/2 radians) at origin
-        sim.reset(x=0, y=0, theta=math.pi / 2)
+        sim.state = RobotState(x=0, y=0, theta=math.pi / 2)
         front_x, front_y = sim.get_front_wheel_pos()
         assert abs(front_x - 0.0) < 0.001  # Should be at same x
         assert abs(front_y - wheelbase) < 0.001  # Should be wheelbase ahead in y
 
         # Test facing west (π radians) at origin
-        sim.reset(x=0, y=0, theta=math.pi)
+        sim.state = RobotState(x=0, y=0, theta=math.pi)
         front_x, front_y = sim.get_front_wheel_pos()
         assert abs(front_x - (-wheelbase)) < 0.001  # Should be wheelbase behind in x
         assert abs(front_y - 0.0) < 0.001  # Should be at same y
 
         # Test facing south (3π/2 radians) at origin
-        sim.reset(x=0, y=0, theta=3 * math.pi / 2)
+        sim.state = RobotState(x=0, y=0, theta=3 * math.pi / 2)
         front_x, front_y = sim.get_front_wheel_pos()
         assert abs(front_x - 0.0) < 0.001  # Should be at same x
         assert abs(front_y - (-wheelbase)) < 0.001  # Should be wheelbase behind in y
@@ -338,7 +342,7 @@ class TestBicycleSim:
 
         # Test at arbitrary position and 45-degree angle
         x, y, theta = 5.0, 3.0, math.pi / 4
-        sim.reset(x=x, y=y, theta=theta)
+        sim.state = RobotState(x=x, y=y, theta=theta)
         front_x, front_y = sim.get_front_wheel_pos()
 
         # Calculate expected position manually
@@ -350,7 +354,7 @@ class TestBicycleSim:
 
         # Test at another arbitrary pose
         x, y, theta = -2.0, 4.5, -math.pi / 6
-        sim.reset(x=x, y=y, theta=theta)
+        sim.state = RobotState(x=x, y=y, theta=theta)
         front_x, front_y = sim.get_front_wheel_pos()
 
         expected_x = x + wheelbase * math.cos(theta)
@@ -372,7 +376,7 @@ class TestBicycleSim:
 
         for wheelbase in test_wheelbases:
             sim = BicycleModel(wheelbase=wheelbase)
-            sim.reset(x=x, y=y, theta=theta)
+            sim.state = RobotState(x=x, y=y, theta=theta)
             front_x, front_y = sim.get_front_wheel_pos()
 
             expected_x = x + wheelbase * math.cos(theta)
@@ -389,7 +393,7 @@ class TestBicycleSim:
         a straight line extending from the front wheel in the current heading direction.
         """
         sim = BicycleModel(wheelbase=2.0)
-        sim.reset(x=0, y=0, theta=0, steering_angle=0.0)
+        sim.state = RobotState(x=0, y=0, theta=0, steering_angle=0.0)
 
         # Test straight path
         distance = 5.0
@@ -425,7 +429,7 @@ class TestBicycleSim:
         """
         sim = BicycleModel(wheelbase=2.0)
         theta = math.pi / 3  # 60 degrees
-        sim.reset(x=1, y=2, theta=theta, steering_angle=0.0)
+        sim.state = RobotState(x=1, y=2, theta=theta, steering_angle=0.0)
 
         distance = 4.0
         num_points = 5
@@ -457,7 +461,7 @@ class TestBicycleSim:
         wheelbase = 2.0
         sim = BicycleModel(wheelbase=wheelbase)
         steering_angle = math.radians(30)  # 30 degrees
-        sim.reset(x=0, y=0, theta=0, steering_angle=steering_angle)
+        sim.state = RobotState(x=0, y=0, theta=0, steering_angle=steering_angle)
 
         distance = 3.0
         num_points = 10
@@ -496,7 +500,7 @@ class TestBicycleSim:
         wheelbase = 2.0
         sim = BicycleModel(wheelbase=wheelbase)
         steering_angle = math.radians(45)  # 45 degrees
-        sim.reset(x=0, y=0, theta=0, steering_angle=steering_angle)
+        sim.state = RobotState(x=0, y=0, theta=0, steering_angle=steering_angle)
 
         proj_x, proj_y = sim.get_projected_path(distance=2.0, num_points=8)
 
@@ -522,7 +526,7 @@ class TestBicycleSim:
         """
         sim = BicycleModel(wheelbase=2.0)
         steering_angle = math.radians(-30)  # -30 degrees (right turn)
-        sim.reset(x=0, y=0, theta=0, steering_angle=steering_angle)
+        sim.state = RobotState(x=0, y=0, theta=0, steering_angle=steering_angle)
 
         proj_x, proj_y = sim.get_projected_path(distance=3.0, num_points=10)
 
@@ -546,11 +550,11 @@ class TestBicycleSim:
 
         # Test very small positive steering angle
         small_angle = 0.005  # Just below the 0.01 threshold
-        sim.reset(x=0, y=0, theta=0, steering_angle=small_angle)
+        sim.state = RobotState(x=0, y=0, theta=0, steering_angle=small_angle)
         proj_x1, proj_y1 = sim.get_projected_path(distance=5.0, num_points=10)
 
         # Test very small negative steering angle
-        sim.reset(x=0, y=0, theta=0, steering_angle=-small_angle)
+        sim.state = RobotState(x=0, y=0, theta=0, steering_angle=-small_angle)
         proj_x2, proj_y2 = sim.get_projected_path(distance=5.0, num_points=10)
 
         # Paths should be nearly symmetric
@@ -568,7 +572,7 @@ class TestBicycleSim:
         values and produces appropriately sized outputs.
         """
         sim = BicycleModel(wheelbase=2.0)
-        sim.reset(x=0, y=0, theta=0, steering_angle=0.0)
+        sim.state = RobotState(x=0, y=0, theta=0, steering_angle=0.0)
 
         # Test different numbers of points
         for num_points in [3, 5, 10, 20]:

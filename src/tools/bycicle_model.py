@@ -112,23 +112,6 @@ class BicycleModel:
         """Set target steering angle"""
         self.steering_model.setpoint = target_angle
 
-    def reset(
-        self,
-        x: float = 0.0,
-        y: float = 0.0,
-        theta: float = 0.0,
-        v: float = 0.0,
-        steering_angle: float = 0.0,
-    ) -> None:
-        """Reset model to initial state"""
-        self.state = RobotState(
-            x=x, y=y, theta=theta, v=v, steering_angle=steering_angle
-        )
-        self.velocity_model.val = v
-        self.velocity_model.setpoint = v
-        self.steering_model.val = steering_angle
-        self.steering_model.setpoint = steering_angle
-
     def step(self, dt: float) -> RobotState:
         """Perform simulation step using bicycle kinematics
 
