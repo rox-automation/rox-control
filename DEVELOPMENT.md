@@ -13,7 +13,7 @@
 
 * [feat_001] Create `src/tools/plot.py` with static visualization functions
     - `plot_simulation_results(states: list[RobotState])` - 2-column layout
-    - Left: xy trajectory with wheel position traces  
+    - Left: xy trajectory with wheel position traces
     - Right: upper plot (steering angle vs time), lower plot (velocity vs time)
     - Reference: `temp/external/python-robotics/temp/mpl_visualizer.py:311-367`
 
