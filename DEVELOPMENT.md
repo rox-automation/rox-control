@@ -9,6 +9,7 @@
 
 ## Feature roadmap
 
+### Planned
 **Static Visualization Tools**
 
 * [feat_001] ✅ **COMPLETED** - Create `src/tools/plot.py` with static visualization functions
@@ -23,31 +24,93 @@
     - Import and call `plot_simulation_results(states, model)` after simulation
     - Graceful handling of missing matplotlib dependency
 
+**Basic waypoint follower**
+
+NOTE: "track" term is used for a series of waypoints that a robot must follow. This was previusly
+often named "path", which has a conflicting meaning with filepath. Therefore useage of "track" is preferred.
+
+This functionality should go into `tools/tracks.py`.
+For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pursuit_2.py`
+
+* [feat_003] - `Track` class for waypoint management in `src/tools/tracks.py`
+    - Port functionality from `Waypoints` class (see reference implementation)
+    - Inherit from `UserList` for list-like behavior with indexing support
+    - Use `rox_vectors.Vector` for waypoints with full type annotation coverage
+    - **Essential methods:**
+      - `find_next_idx(xy: Vector) -> int` - find next waypoint index (core tracking logic)
+      - `target_reached` property - check if end of track reached
+    - **Features:**
+      - Automatic Vector conversion in `__init__` for tuples/lists
+      - Private `next_idx` attribute for internal state management
+      - Validation: Ensure minimum 2 waypoints on creation
+    - Add comprehensive unit tests with edge cases
+
+* [feat_004] - Track generator functions in `src/tools/tracks.py`
+    - **Function signature:** `generate_track(track_type: str, **kwargs) -> Track`
+    - **Supported track types:**
+      - `"square"` - Parameterized square path with `size: float = 1.0`, `resolution: int = 4`
+      - `"circle"` - Circular path with `radius: float = 1.0`, `center: Vector = Vector(0,0)`, `resolution: int = 16`
+      - `"figure8"` - Figure-8 pattern with `size: float = 1.0`, `resolution: int = 32`
+    - **Features:**
+      - Consistent waypoint spacing via optional `spacing: float` parameter
+      - Parameter validation with clear error messages
+      - Returns properly initialized `Track` objects
+    - Add unit tests for all track types and parameter combinations
+
+* [feat_005] - Pure pursuit controller in `src/rox_control/controllers.py` (new module)
+    - **Class-based design:** `PurePursuitController` with clean stateful interface
+    - **Constructor parameters:**
+      - `look_ahead_distance: float = 0.2` - lookahead distance for target calculation
+      - `velocity_vector_length: float = 0.1` - robot velocity projection length
+      - `proportional_gain: float = 1.0` - steering control gain
+      - `target_speed: float = 0.1` - desired robot velocity
+    - **Core interface:**
+      - `set_track(track: Track)` - assign track for controller to follow
+      - `control(robot_state: RobotState) -> ControlOutput` - returns structured control data
+    - **ControlOutput dataclass:**
+      - `curvature: float` - steering command (essential)
+      - `velocity: float` - speed command (essential)
+      - `target_point: Vector` - target point for visualization
+      - `future_position: Vector` - projected robot position
+      - `angle_error: float` - pure pursuit angle error for debugging
+      - `track_complete: bool` - whether track following is finished
+    - **Features:**
+      - Integrates with `Track` objects from feat_003 and `RobotState` from bicycle model
+      - Extensible output format for visualization and debugging
+      - Handles track completion and safety edge cases
+    - Port core algorithm from `target_position()` and `proportional_control()` functions
+    - Add comprehensive unit tests and integration tests with Track class
+
+**Architectural Considerations:**
+- **Module Organization:** Consider splitting `tracks.py` if it grows large - separate `Track`/generators from controller logic
+- **Testing Strategy:** Each feature in core library needs comprehensive unit tests with edge cases (empty tracks, single waypoint, malformed data). Code contained in `tools` may have less strict testing, we should not care too much about edge cases here.
+- **Type Safety:** Full mypy compliance with no `# type: ignore` comments required
+- **Documentation:** Add docstring for each class/function where function name may need some clarification. A single line docstring is enough, typehints should provide enough context about the interface.
+
+
+
+### Not planned yet
+
 **Animation Tools**
 
-* [feat_003] Create `src/tools/animation.py` with live animation functions
+* Create `src/tools/animation.py` with live animation functions
     - `animate_simulation(states: list[RobotState])` - replay with matplotlib animation
     - Progressive state replay with configurable playbook speed
     - Show projected path curve for front wheel during replay
     - Reference: `temp/external/python-robotics/temp/mpl_visualizer.py:369-443`
 
-**Data Export & Replay**
 
-* [feat_004] Add CSV export functionality to `examples/01_basic_simulation.py`
-    - `save_states_to_csv(states: list[RobotState], filename: str)` helper function
-    - Export time series data with proper headers (time, x, y, theta, v, steering_angle)
+* Create `examples/02_animate.py`
+    - Use `examples/01_basic_simulation.py` as a base (import functions).
+    - use `RobotState` objects to create an animation.
 
-* [feat_005] Create `examples/02_replay_data.py`
-    - Load CSV data and convert back to `RobotState` objects
-    - Demonstrate static plotting and animation from saved data
 
-**Advanced Visualization Features**
 
-* [feat_006] Extend `src/tools/plot.py` with additional plot types
+*  Extend `src/tools/plot.py` with additional plot types
     - Trajectory analysis plots (curvature, acceleration profiles)
     - Multi-simulation comparison capabilities
 
-* [feat_007] Extend `src/tools/animation.py` with interactive features
+* Extend `src/tools/animation.py` with interactive features
     - Play/pause controls, speed adjustment
     - Real-time parameter display overlay
 
