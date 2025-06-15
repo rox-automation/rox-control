@@ -38,6 +38,7 @@ dev = [
     "ruff",
     "invoke",
     "pre-commit",
+    "matplotlib",
 ]
 
 

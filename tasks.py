@@ -1,7 +1,6 @@
 # type: ignore
 import os
 import time
-from click import prompt
 from invoke import task
 
 
@@ -16,12 +15,8 @@ def clean(ctx):
 
     ctx.run("git clean -nfdx")
 
-    if (
-        prompt(
-            "Are you sure you want to remove all untracked files? (y/n)", default="n"
-        )
-        == "y"
-    ):
+    response = input("Are you sure you want to remove all untracked files? (y/n) [n]: ")
+    if response.lower() in ("y", "yes"):
         ctx.run("git clean -fdx")
 
 

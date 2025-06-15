@@ -113,6 +113,31 @@ def main() -> None:
 
     t_end = time.time()
     present_results(states, t_end - t_start)
+    
+    # Demonstrate plotting functionality (feat_001)
+    print("\nGenerating plots...")
+    try:
+        import matplotlib.pyplot as plt
+        
+        from tools.plot import plot_simulation_results
+        
+        # Create model with same parameters as simulation
+        model = BicycleModel(
+            wheelbase=2.5,
+            accel=2.0,
+            steering_speed=math.radians(30),
+            max_steering_angle=math.radians(45),
+            max_velocity=15.0,
+        )
+        
+        plot_simulation_results(states, model)
+        plt.show()
+        print("Plots displayed successfully!")
+        
+    except ImportError:
+        print("Matplotlib not available - skipping plot generation")
+    except Exception as e:
+        print(f"Error generating plots: {e}")
 
 
 if __name__ == "__main__":
