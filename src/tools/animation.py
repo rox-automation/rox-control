@@ -200,12 +200,14 @@ def animate_simulation(
     print("Debug info will be printed to terminal during playback")
     print()
 
-    # Create and run animation
-    animation.FuncAnimation(
+    # Create and run animation (keep reference to prevent garbage collection)
+    anim = animation.FuncAnimation(
         fig, update, frames=len(frames), interval=interval, blit=False, repeat=False
     )
 
     plt.tight_layout()
     plt.show()
-
-    print("\nAnimation complete!")
+    
+    # Keep animation reference alive until show() completes
+    _ = anim  # Prevent garbage collection
+    print(f"\nAnimation complete!")
