@@ -11,14 +11,17 @@
 
 **Static Visualization Tools**
 
-* [feat_001] Create `src/tools/plot.py` with static visualization functions
-    - `plot_simulation_results(states: list[RobotState])` - 2-column layout
-    - Left: xy trajectory with wheel position traces
+* [feat_001] ✅ **COMPLETED** - Create `src/tools/plot.py` with static visualization functions
+    - `plot_simulation_results(states: list[RobotState], model: BicycleModel)` - 2-column layout
+    - Left: xy trajectory with rear/front wheel traces, start/end markers
     - Right: upper plot (steering angle vs time), lower plot (velocity vs time)
+    - Uses model geometric methods for accurate wheel positioning
+    - Added matplotlib as dev dependency
     - Reference: `temp/external/python-robotics/temp/mpl_visualizer.py:311-367`
 
-* [feat_002] Update `examples/01_basic_simulation.py` to demonstrate plotting
-    - Import and call `plot_simulation_results(states)` after simulation
+* [feat_002] ✅ **COMPLETED** - Update `examples/01_basic_simulation.py` to demonstrate plotting
+    - Import and call `plot_simulation_results(states, model)` after simulation
+    - Graceful handling of missing matplotlib dependency
 
 **Animation Tools**
 
@@ -88,5 +91,19 @@ Open in VS Code and select "Reopen in Container" for a pre-configured developmen
 ## Project Structure
 
 * `src/rox_control/` - Application code
+* `src/tools/` - Supporting simulation and visualization code (not packaged)
 * `tasks.py` - Automation tasks via invoke
 * `pyproject.toml` - Modern Python packaging configuration
+
+## Implementation Notes
+
+### Completed Features
+
+**Static Visualization (feat_001, feat_002)**
+- API: `plot_simulation_results(states: list[RobotState], model: BicycleModel)`
+- Uses the same `BicycleModel` instance that generated the states for consistency
+- Front/rear wheel positions calculated using `model.get_front_wheel_pos()`
+- Data extraction separated into `extract_trajectory_data()` helper function
+- Matplotlib added as dev dependency only (visualization tooling)
+- Example integration demonstrates graceful matplotlib dependency handling
+- Smoke tests optimized for CI/CD speed (0.39s total test time)
