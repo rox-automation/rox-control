@@ -394,7 +394,9 @@ class TestBicycleSim:
         # Test straight path
         distance = 5.0
         num_points = 6
-        proj_x, proj_y = sim.get_projected_path(distance=distance, num_points=num_points)
+        proj_x, proj_y = sim.get_projected_path(
+            distance=distance, num_points=num_points
+        )
 
         assert len(proj_x) == num_points
         assert len(proj_y) == num_points
@@ -405,7 +407,7 @@ class TestBicycleSim:
         assert abs(proj_y[0] - front_y) < 0.001
 
         # Path should be straight line in x direction (theta=0)
-        for i, y in enumerate(proj_y):
+        for y in proj_y:
             assert abs(y - front_y) < 0.001  # All y coordinates should be same
 
         # X coordinates should increase linearly
@@ -427,7 +429,9 @@ class TestBicycleSim:
 
         distance = 4.0
         num_points = 5
-        proj_x, proj_y = sim.get_projected_path(distance=distance, num_points=num_points)
+        proj_x, proj_y = sim.get_projected_path(
+            distance=distance, num_points=num_points
+        )
 
         # Path should start at front wheel position
         front_x, front_y = sim.get_front_wheel_pos()
@@ -457,7 +461,9 @@ class TestBicycleSim:
 
         distance = 3.0
         num_points = 10
-        proj_x, proj_y = sim.get_projected_path(distance=distance, num_points=num_points)
+        proj_x, proj_y = sim.get_projected_path(
+            distance=distance, num_points=num_points
+        )
 
         assert len(proj_x) == num_points
         assert len(proj_y) == num_points
@@ -471,7 +477,9 @@ class TestBicycleSim:
         # Check that middle points deviate from straight line
         straight_line_y = front_y  # Would be constant for straight motion at theta=0
         middle_point_y = proj_y[len(proj_y) // 2]
-        assert abs(middle_point_y - straight_line_y) > 0.1  # Should deviate significantly
+        assert (
+            abs(middle_point_y - straight_line_y) > 0.1
+        )  # Should deviate significantly
 
         # Verify the path curves in the expected direction
         # Positive steering angle should curve left (positive y direction)
@@ -501,7 +509,7 @@ class TestBicycleSim:
         front_x, front_y = sim.get_front_wheel_pos()
         expected_radius = math.sqrt((front_x - icr_x) ** 2 + (front_y - icr_y) ** 2)
 
-        for x, y in zip(proj_x, proj_y):
+        for x, y in zip(proj_x, proj_y, strict=False):
             actual_radius = math.sqrt((x - icr_x) ** 2 + (y - icr_y) ** 2)
             assert abs(actual_radius - expected_radius) < 0.01
 
@@ -548,7 +556,9 @@ class TestBicycleSim:
         # Paths should be nearly symmetric
         for i in range(len(proj_x1)):
             assert abs(proj_x1[i] - proj_x2[i]) < 0.001  # X coords should be same
-            assert abs(proj_y1[i] + proj_y2[i]) < 0.1  # Y coords should be nearly opposite
+            assert (
+                abs(proj_y1[i] + proj_y2[i]) < 0.1
+            )  # Y coords should be nearly opposite
 
     def test_projected_path_parameters(self) -> None:
         """
@@ -570,7 +580,7 @@ class TestBicycleSim:
         for distance in [1.0, 3.0, 10.0]:
             proj_x, proj_y = sim.get_projected_path(distance=distance, num_points=5)
             front_x, front_y = sim.get_front_wheel_pos()
-            
+
             # Last point should be approximately at the specified distance
             actual_distance = math.sqrt(
                 (proj_x[-1] - front_x) ** 2 + (proj_y[-1] - front_y) ** 2
