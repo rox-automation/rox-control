@@ -28,8 +28,8 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
 
 * [feat_004] ✅ **COMPLETED** - Track generator functions in [`src/tools/tracks.py`](src/tools/tracks.py) with tests in [`tests/test_track_generators.py`](tests/test_track_generators.py)
 
-* [feat_005] - Pure pursuit controller in `src/rox_control/controllers.py` (new module)
-    - **Class-based design:** `PurePursuitController` with clean stateful interface
+* [feat_005] ✅ **COMPLETED** - Pure pursuit A controller in [`src/rox_control/controllers/pure_pursuit_a.py`](src/rox_control/controllers/pure_pursuit_a.py) with tests in [`tests/test_controllers.py`](tests/test_controllers.py)
+    - **Class-based design:** `PurePursuitA` with clean stateful interface  
     - **Constructor parameters:**
       - `look_ahead_distance: float = 0.2` - lookahead distance for target calculation
       - `velocity_vector_length: float = 0.1` - robot velocity projection length
@@ -45,18 +45,26 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
       - `future_position: Vector` - projected robot position
       - `angle_error: float` - pure pursuit angle error for debugging
       - `track_complete: bool` - whether track following is finished
-    - **Features:**
-      - Integrates with `Track` objects from feat_003 and `RobotState` from bicycle model
-      - Extensible output format for visualization and debugging
-      - Handles track completion and safety edge cases
-    - Port core algorithm from `target_position()` and `proportional_control()` functions
-    - Add comprehensive unit tests and integration tests with Track class
+    - **Algorithm:** Velocity-projected pure pursuit with proportional control
+      - Projects robot future position using velocity vector
+      - Projects onto current waypoint segment using `point_on_line`
+      - Adds fixed lookahead distance along path direction
+      - Uses proportional gain on angle error for curvature output
+    - **Module structure:** Controllers organized in `src/rox_control/controllers/` directory
+      - Each controller implemented in separate file with own `Controller` class
+      - Exported as descriptive names via `__init__.py` (e.g., `PurePursuitA`)
+      - Shared `ControlOutput` dataclass for consistent interface
 
 **Architectural Considerations:**
-- **Module Organization:** Consider splitting `tracks.py` if it grows large - separate `Track`/generators from controller logic
-- **Testing Strategy:** Each feature in core library needs comprehensive unit tests with edge cases (empty tracks, single waypoint, malformed data). Code contained in `tools` may have less strict testing, we should not care too much about edge cases here.
-- **Type Safety:** Full mypy compliance with no `# type: ignore` comments required
-- **Documentation:** Add docstring for each class/function where function name may need some clarification. A single line docstring is enough, typehints should provide enough context about the interface.
+- **Module Organization:** ✅ Controllers organized in `src/rox_control/controllers/` directory structure
+  - Each controller in separate file with descriptive name (e.g., `pure_pursuit_a.py`)
+  - Exported with clear names via `__init__.py` (e.g., `PurePursuitA`)
+  - Shared `ControlOutput` dataclass for consistent interface across controllers
+- **Testing Strategy:** ✅ Comprehensive unit tests with edge cases implemented
+  - Core library features have full test coverage (empty tracks, single waypoint, malformed data)
+  - Code in `tools` may have less strict testing requirements
+- **Type Safety:** ✅ Full mypy compliance achieved with proper type annotations
+- **Documentation:** ✅ Descriptive docstrings added for all classes and non-trivial functions
 
 
 

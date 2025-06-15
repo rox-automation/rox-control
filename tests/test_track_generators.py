@@ -27,9 +27,9 @@ class TestSquareTrack:
         # Check that waypoints form a square centered at origin
         waypoints = list(track)
         assert waypoints[0] == Vector(-0.5, -0.5)  # Bottom-left
-        assert waypoints[1] == Vector(0.5, -0.5)   # Bottom-right
-        assert waypoints[2] == Vector(0.5, 0.5)    # Top-right
-        assert waypoints[3] == Vector(-0.5, 0.5)   # Top-left
+        assert waypoints[1] == Vector(0.5, -0.5)  # Bottom-right
+        assert waypoints[2] == Vector(0.5, 0.5)  # Top-right
+        assert waypoints[3] == Vector(-0.5, 0.5)  # Top-left
         assert waypoints[4] == Vector(-0.5, -0.5)  # Closing point
 
     def test_custom_size(self):
@@ -39,16 +39,16 @@ class TestSquareTrack:
 
         # Should have corners at ±1.0 (half of size=2.0)
         assert waypoints[0] == Vector(-1.0, -1.0)  # Bottom-left
-        assert waypoints[1] == Vector(1.0, -1.0)   # Bottom-right
-        assert waypoints[2] == Vector(1.0, 1.0)    # Top-right
-        assert waypoints[3] == Vector(-1.0, 1.0)   # Top-left
+        assert waypoints[1] == Vector(1.0, -1.0)  # Bottom-right
+        assert waypoints[2] == Vector(1.0, 1.0)  # Top-right
+        assert waypoints[3] == Vector(-1.0, 1.0)  # Top-left
         assert waypoints[4] == Vector(-1.0, -1.0)  # Closing point
 
     def test_square_is_closed_loop(self):
         """Test that square forms a closed loop."""
         track = generate_track("square")
         waypoints = list(track)
-        
+
         # First and last points should be the same
         assert waypoints[0] == waypoints[-1]
 
@@ -59,7 +59,6 @@ class TestSquareTrack:
 
         with pytest.raises(ValueError, match="Size must be positive"):
             generate_track("square", size=0.0)
-
 
 
 class TestCircleTrack:
@@ -114,7 +113,6 @@ class TestCircleTrack:
             generate_track("circle", resolution=2)
 
 
-
 class TestFigure8Track:
     """Test figure-8 track generation."""
 
@@ -153,9 +151,6 @@ class TestFigure8Track:
         """Test error handling for invalid resolution."""
         with pytest.raises(ValueError, match="Resolution must be at least 6"):
             generate_track("figure8", resolution=5)
-
-
-
 
 
 class TestTrackIntegration:
