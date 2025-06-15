@@ -32,52 +32,30 @@ def generate_track(track_type: str, **kwargs: Any) -> Track:
         raise ValueError(f"Unsupported track type: {track_type}")
 
 
-def _generate_square_track(
-    size: float = 1.0, resolution: int = 4, spacing: float | None = None
-) -> Track:
+def _generate_square_track(size: float = 1.0) -> Track:
     """Generate square track with parameterized dimensions.
 
     Args:
         size: Side length of the square
-        resolution: Number of waypoints per side (minimum 1)
-        spacing: Optional uniform spacing between waypoints
 
     Returns:
-        Track with square waypoints
+        Track with 5 waypoints (4 corners + closing point)
 
     Raises:
-        ValueError: If parameters are invalid
+        ValueError: If size is invalid
     """
     if size <= 0:
         raise ValueError("Size must be positive")
-    if resolution < 1:
-        raise ValueError("Resolution must be at least 1")
 
-    # Define square corners
+    # Define square corners plus closing point
     half_size = size / 2
-    corners = [
+    waypoints = [
         Vector(-half_size, -half_size),  # Bottom-left
         Vector(half_size, -half_size),  # Bottom-right
         Vector(half_size, half_size),  # Top-right
         Vector(-half_size, half_size),  # Top-left
+        Vector(-half_size, -half_size),  # Close the loop
     ]
-
-    waypoints = []
-    for i in range(4):  # Four sides
-        start = corners[i]
-        end = corners[(i + 1) % 4]
-
-        # Generate waypoints along this side
-        for j in range(resolution):
-            t = j / resolution
-            point = Vector(
-                start.x + t * (end.x - start.x), start.y + t * (end.y - start.y)
-            )
-            waypoints.append(point)
-
-    # Apply spacing if specified
-    if spacing is not None:
-        waypoints = _apply_spacing(waypoints, spacing)
 
     return Track(waypoints)  # type: ignore[arg-type]
 
@@ -86,7 +64,6 @@ def _generate_circle_track(
     radius: float = 1.0,
     center: Vector | None = None,
     resolution: int = 16,
-    spacing: float | None = None,
 ) -> Track:
     """Generate circular track with parameterized radius and center.
 
@@ -94,7 +71,6 @@ def _generate_circle_track(
         radius: Circle radius
         center: Center point of the circle
         resolution: Number of waypoints around the circle
-        spacing: Optional uniform spacing between waypoints
 
     Returns:
         Track with circular waypoints
@@ -117,22 +93,15 @@ def _generate_circle_track(
         y = center.y + radius * math.sin(angle)
         waypoints.append(Vector(x, y))
 
-    # Apply spacing if specified
-    if spacing is not None:
-        waypoints = _apply_spacing(waypoints, spacing)
-
     return Track(waypoints)  # type: ignore[arg-type]
 
 
-def _generate_figure8_track(
-    size: float = 1.0, resolution: int = 32, spacing: float | None = None
-) -> Track:
+def _generate_figure8_track(size: float = 1.0, resolution: int = 32) -> Track:
     """Generate figure-8 track with parameterized size.
 
     Args:
         size: Overall size of the figure-8
         resolution: Number of waypoints for the complete figure-8
-        spacing: Optional uniform spacing between waypoints
 
     Returns:
         Track with figure-8 waypoints
@@ -153,64 +122,4 @@ def _generate_figure8_track(
         y = size * math.sin(t) * math.cos(t) / (1 + math.cos(t) ** 2)
         waypoints.append(Vector(x, y))
 
-    # Apply spacing if specified
-    if spacing is not None:
-        waypoints = _apply_spacing(waypoints, spacing)
-
     return Track(waypoints)  # type: ignore[arg-type]
-
-
-def _apply_spacing(waypoints: list[Vector], spacing: float) -> list[Vector]:
-    """Apply consistent spacing between waypoints.
-
-    Args:
-        waypoints: Original waypoints
-        spacing: Desired spacing between waypoints
-
-    Returns:
-        Waypoints with consistent spacing
-
-    Raises:
-        ValueError: If spacing is not positive
-    """
-    if spacing <= 0:
-        raise ValueError("Spacing must be positive")
-
-    if len(waypoints) < 2:
-        return waypoints
-
-    # Calculate total path length
-    total_length = 0.0
-    for i in range(len(waypoints)):
-        next_i = (i + 1) % len(waypoints)
-        total_length += abs(waypoints[next_i] - waypoints[i])
-
-    # Calculate number of evenly spaced points
-    num_points = max(2, int(total_length / spacing))
-
-    # Generate evenly spaced waypoints
-    spaced_waypoints = []
-    target_distance = 0.0
-
-    for i in range(num_points):
-        target_distance = i * spacing
-
-        # Find the segment containing the target distance
-        cumulative_distance = 0.0
-        for j in range(len(waypoints)):
-            next_j = (j + 1) % len(waypoints)
-            segment_length = abs(waypoints[next_j] - waypoints[j])
-
-            if cumulative_distance + segment_length >= target_distance:
-                # Interpolate within this segment
-                t = (target_distance - cumulative_distance) / segment_length
-                point = Vector(
-                    waypoints[j].x + t * (waypoints[next_j].x - waypoints[j].x),
-                    waypoints[j].y + t * (waypoints[next_j].y - waypoints[j].y),
-                )
-                spaced_waypoints.append(point)
-                break
-
-            cumulative_distance += segment_length
-
-    return spaced_waypoints

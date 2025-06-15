@@ -22,11 +22,15 @@ class TestSquareTrack:
     def test_default_square(self):
         """Test square with default parameters."""
         track = generate_track("square")
-        assert len(track) == 16  # 4 sides x 4 points per side
+        assert len(track) == 5  # 4 corners + closing point
 
         # Check that waypoints form a square centered at origin
         waypoints = list(track)
-        assert waypoints[0] == Vector(-0.5, -0.5)  # Bottom-left corner area
+        assert waypoints[0] == Vector(-0.5, -0.5)  # Bottom-left
+        assert waypoints[1] == Vector(0.5, -0.5)   # Bottom-right
+        assert waypoints[2] == Vector(0.5, 0.5)    # Top-right
+        assert waypoints[3] == Vector(-0.5, 0.5)   # Top-left
+        assert waypoints[4] == Vector(-0.5, -0.5)  # Closing point
 
     def test_custom_size(self):
         """Test square with custom size."""
@@ -34,13 +38,19 @@ class TestSquareTrack:
         waypoints = list(track)
 
         # Should have corners at ±1.0 (half of size=2.0)
-        expected_corner = Vector(-1.0, -1.0)
-        assert waypoints[0] == expected_corner
+        assert waypoints[0] == Vector(-1.0, -1.0)  # Bottom-left
+        assert waypoints[1] == Vector(1.0, -1.0)   # Bottom-right
+        assert waypoints[2] == Vector(1.0, 1.0)    # Top-right
+        assert waypoints[3] == Vector(-1.0, 1.0)   # Top-left
+        assert waypoints[4] == Vector(-1.0, -1.0)  # Closing point
 
-    def test_custom_resolution(self):
-        """Test square with custom resolution."""
-        track = generate_track("square", resolution=2)
-        assert len(track) == 8  # 4 sides x 2 points per side
+    def test_square_is_closed_loop(self):
+        """Test that square forms a closed loop."""
+        track = generate_track("square")
+        waypoints = list(track)
+        
+        # First and last points should be the same
+        assert waypoints[0] == waypoints[-1]
 
     def test_invalid_size(self):
         """Test error handling for invalid size."""
@@ -50,30 +60,6 @@ class TestSquareTrack:
         with pytest.raises(ValueError, match="Size must be positive"):
             generate_track("square", size=0.0)
 
-    def test_invalid_resolution(self):
-        """Test error handling for invalid resolution."""
-        with pytest.raises(ValueError, match="Resolution must be at least 1"):
-            generate_track("square", resolution=0)
-
-    def test_square_with_spacing(self):
-        """Test square with uniform spacing."""
-        track = generate_track("square", size=2.0, spacing=0.5)
-        waypoints = list(track)
-
-        # With perimeter=8.0 and spacing=0.5, expect 16 points
-        assert len(waypoints) >= 2  # At minimum should have 2 points
-
-        # Check that spacing is approximately consistent
-        if len(waypoints) > 2:
-            distances = []
-            for i in range(len(waypoints)):
-                next_i = (i + 1) % len(waypoints)
-                dist = abs(waypoints[next_i] - waypoints[i])
-                distances.append(dist)
-
-            # Spacing should be reasonably consistent
-            avg_spacing = sum(distances) / len(distances)
-            assert abs(avg_spacing - 0.5) < 0.1
 
 
 class TestCircleTrack:
@@ -127,18 +113,6 @@ class TestCircleTrack:
         with pytest.raises(ValueError, match="Resolution must be at least 3"):
             generate_track("circle", resolution=2)
 
-    def test_circle_with_spacing(self):
-        """Test circle with uniform spacing."""
-        track = generate_track("circle", radius=1.0, spacing=0.5)
-        waypoints = list(track)
-
-        # With circumference≈6.28 and spacing=0.5, expect ~12-13 points
-        assert len(waypoints) >= 2
-
-        # Check that all points are still on the circle
-        for wp in waypoints:
-            distance_from_origin = abs(wp - Vector(0, 0))
-            assert abs(distance_from_origin - 1.0) < 0.1
 
 
 class TestFigure8Track:
@@ -180,39 +154,8 @@ class TestFigure8Track:
         with pytest.raises(ValueError, match="Resolution must be at least 6"):
             generate_track("figure8", resolution=5)
 
-    def test_figure8_with_spacing(self):
-        """Test figure-8 with uniform spacing."""
-        track = generate_track("figure8", size=1.0, spacing=0.2)
-        waypoints = list(track)
-
-        assert len(waypoints) >= 2
 
 
-class TestSpacingParameter:
-    """Test spacing parameter behavior across all track types."""
-
-    def test_invalid_spacing(self):
-        """Test error handling for invalid spacing values."""
-        with pytest.raises(ValueError, match="Spacing must be positive"):
-            generate_track("square", spacing=-0.1)
-
-        with pytest.raises(ValueError, match="Spacing must be positive"):
-            generate_track("circle", spacing=0.0)
-
-        with pytest.raises(ValueError, match="Spacing must be positive"):
-            generate_track("figure8", spacing=-1.0)
-
-    def test_very_large_spacing(self):
-        """Test behavior with very large spacing values."""
-        # Large spacing should result in minimum 2 waypoints
-        track = generate_track("square", size=4.0, spacing=1.0)
-        assert len(track) >= 2
-
-    def test_very_small_spacing(self):
-        """Test behavior with very small spacing values."""
-        # Small spacing should result in many waypoints
-        track = generate_track("circle", radius=1.0, spacing=0.1)
-        assert len(track) > 10  # Should have many points
 
 
 class TestTrackIntegration:
