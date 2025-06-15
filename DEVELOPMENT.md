@@ -12,17 +12,9 @@
 ### Planned
 **Static Visualization Tools**
 
-* [feat_001] ✅ **COMPLETED** - Create `src/tools/plot.py` with static visualization functions
-    - `plot_simulation_results(states: list[RobotState], model: BicycleModel)` - 2-column layout
-    - Left: xy trajectory with rear/front wheel traces, start/end markers
-    - Right: upper plot (steering angle vs time), lower plot (velocity vs time)
-    - Uses model geometric methods for accurate wheel positioning
-    - Added matplotlib as dev dependency
-    - Reference: `temp/external/python-robotics/temp/mpl_visualizer.py:311-367`
+* [feat_001] ✅ **COMPLETED** - Static visualization functions in [`src/tools/plot.py`](src/tools/plot.py)
 
-* [feat_002] ✅ **COMPLETED** - Update `examples/01_basic_simulation.py` to demonstrate plotting
-    - Import and call `plot_simulation_results(states, model)` after simulation
-    - Graceful handling of missing matplotlib dependency
+* [feat_002] ✅ **COMPLETED** - Updated example to use plotting in [`examples/01_basic_simulation.py`](examples/01_basic_simulation.py)
 
 **Basic waypoint follower**
 
@@ -32,18 +24,7 @@ often named "path", which has a conflicting meaning with filepath. Therefore use
 This functionality should go into `src/rox_control/tracks.py`.
 For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pursuit_2.py`
 
-* [feat_003] ✅ **COMPLETED** - `Track` class for waypoint management in `src/rox_control/tracks.py`
-    - Port functionality from `Waypoints` class (see reference implementation)
-    - Inherit from `UserList` for list-like behavior with indexing support
-    - Use `rox_vectors.Vector` for waypoints with full type annotation coverage
-    - **Essential methods:**
-      - `find_next_idx(xy: Vector) -> int` - find next waypoint index (core tracking logic)
-      - `target_reached` property - check if end of track reached
-    - **Features:**
-      - Automatic Vector conversion in `__init__` for tuples/lists
-      - Private `_next_idx` attribute for internal state management
-      - Validation: Ensure minimum 2 waypoints on creation
-    - Added comprehensive unit tests with edge cases (20 test cases, 100% coverage)
+* [feat_003] ✅ **COMPLETED** - Track class for waypoint management in [`src/rox_control/tracks.py`](src/rox_control/tracks.py) with tests in [`tests/test_tracks.py`](tests/test_tracks.py)
 
 * [feat_004] - Track generator functions in `src/tools/tracks.py`
     - **Function signature:** `generate_track(track_type: str, **kwargs) -> Track`
@@ -158,15 +139,3 @@ Open in VS Code and select "Reopen in Container" for a pre-configured developmen
 * `tasks.py` - Automation tasks via invoke
 * `pyproject.toml` - Modern Python packaging configuration
 
-## Implementation Notes
-
-### Completed Features
-
-**Static Visualization (feat_001, feat_002)**
-- Implementation: [`src/tools/plot.py`](src/tools/plot.py) - `plot_simulation_results()` function
-- Example usage: [`examples/01_basic_simulation.py`](examples/01_basic_simulation.py)
-- Tests: [`tests/test_smoke.py`](tests/test_smoke.py) - import validation
-
-**Track Class (feat_003)**
-- Implementation: [`src/rox_control/tracks.py`](src/rox_control/tracks.py) - `Track` class with UserList inheritance
-- Tests: [`tests/test_tracks.py`](tests/test_tracks.py) - 20 test cases with 100% coverage
