@@ -290,3 +290,289 @@ class TestBicycleSim:
             sim.step(dt)
 
         assert abs(sim.state.steering_angle) <= max_steering + 0.01
+
+    def test_front_wheel_position_basic(self) -> None:
+        """
+        Test front wheel position calculation for basic orientations.
+
+        Rationale: The front wheel position is crucial for visualization and control.
+        This test verifies the geometric calculation using basic trigonometry
+        for cardinal directions where results are easily predictable.
+        """
+        wheelbase = 2.5
+        sim = BicycleModel(wheelbase=wheelbase)
+
+        # Test facing east (0 radians) at origin
+        sim.reset(x=0, y=0, theta=0)
+        front_x, front_y = sim.get_front_wheel_pos()
+        assert abs(front_x - wheelbase) < 0.001  # Should be wheelbase ahead in x
+        assert abs(front_y - 0.0) < 0.001  # Should be at same y
+
+        # Test facing north (π/2 radians) at origin
+        sim.reset(x=0, y=0, theta=math.pi / 2)
+        front_x, front_y = sim.get_front_wheel_pos()
+        assert abs(front_x - 0.0) < 0.001  # Should be at same x
+        assert abs(front_y - wheelbase) < 0.001  # Should be wheelbase ahead in y
+
+        # Test facing west (π radians) at origin
+        sim.reset(x=0, y=0, theta=math.pi)
+        front_x, front_y = sim.get_front_wheel_pos()
+        assert abs(front_x - (-wheelbase)) < 0.001  # Should be wheelbase behind in x
+        assert abs(front_y - 0.0) < 0.001  # Should be at same y
+
+        # Test facing south (3π/2 radians) at origin
+        sim.reset(x=0, y=0, theta=3 * math.pi / 2)
+        front_x, front_y = sim.get_front_wheel_pos()
+        assert abs(front_x - 0.0) < 0.001  # Should be at same x
+        assert abs(front_y - (-wheelbase)) < 0.001  # Should be wheelbase behind in y
+
+    def test_front_wheel_position_arbitrary_pose(self) -> None:
+        """
+        Test front wheel position calculation for arbitrary robot poses.
+
+        Rationale: Verifies the geometric calculation works correctly for
+        any robot position and orientation, not just cardinal directions.
+        """
+        wheelbase = 2.0
+        sim = BicycleModel(wheelbase=wheelbase)
+
+        # Test at arbitrary position and 45-degree angle
+        x, y, theta = 5.0, 3.0, math.pi / 4
+        sim.reset(x=x, y=y, theta=theta)
+        front_x, front_y = sim.get_front_wheel_pos()
+
+        # Calculate expected position manually
+        expected_x = x + wheelbase * math.cos(theta)
+        expected_y = y + wheelbase * math.sin(theta)
+
+        assert abs(front_x - expected_x) < 0.001
+        assert abs(front_y - expected_y) < 0.001
+
+        # Test at another arbitrary pose
+        x, y, theta = -2.0, 4.5, -math.pi / 6
+        sim.reset(x=x, y=y, theta=theta)
+        front_x, front_y = sim.get_front_wheel_pos()
+
+        expected_x = x + wheelbase * math.cos(theta)
+        expected_y = y + wheelbase * math.sin(theta)
+
+        assert abs(front_x - expected_x) < 0.001
+        assert abs(front_y - expected_y) < 0.001
+
+    def test_front_wheel_position_different_wheelbase(self) -> None:
+        """
+        Test front wheel position calculation with different wheelbase values.
+
+        Rationale: Ensures the calculation correctly uses the wheelbase parameter
+        and works for different vehicle configurations.
+        """
+        # Test with different wheelbase values
+        test_wheelbases = [1.0, 2.5, 4.0]
+        x, y, theta = 1.0, 1.0, math.pi / 3
+
+        for wheelbase in test_wheelbases:
+            sim = BicycleModel(wheelbase=wheelbase)
+            sim.reset(x=x, y=y, theta=theta)
+            front_x, front_y = sim.get_front_wheel_pos()
+
+            expected_x = x + wheelbase * math.cos(theta)
+            expected_y = y + wheelbase * math.sin(theta)
+
+            assert abs(front_x - expected_x) < 0.001
+            assert abs(front_y - expected_y) < 0.001
+
+    def test_projected_path_straight_line(self) -> None:
+        """
+        Test projected path calculation for straight-line motion.
+
+        Rationale: When steering angle is zero, the projected path should be
+        a straight line extending from the front wheel in the current heading direction.
+        """
+        sim = BicycleModel(wheelbase=2.0)
+        sim.reset(x=0, y=0, theta=0, steering_angle=0.0)
+
+        # Test straight path
+        distance = 5.0
+        num_points = 6
+        proj_x, proj_y = sim.get_projected_path(distance=distance, num_points=num_points)
+
+        assert len(proj_x) == num_points
+        assert len(proj_y) == num_points
+
+        # Path should start at front wheel position
+        front_x, front_y = sim.get_front_wheel_pos()
+        assert abs(proj_x[0] - front_x) < 0.001
+        assert abs(proj_y[0] - front_y) < 0.001
+
+        # Path should be straight line in x direction (theta=0)
+        for i, y in enumerate(proj_y):
+            assert abs(y - front_y) < 0.001  # All y coordinates should be same
+
+        # X coordinates should increase linearly
+        expected_x_increment = distance / (num_points - 1)
+        for i, x in enumerate(proj_x):
+            expected_x = front_x + i * expected_x_increment
+            assert abs(x - expected_x) < 0.001
+
+    def test_projected_path_straight_line_arbitrary_heading(self) -> None:
+        """
+        Test projected path for straight-line motion with arbitrary heading.
+
+        Rationale: Verifies that straight-line projection works correctly
+        regardless of the robot's current orientation.
+        """
+        sim = BicycleModel(wheelbase=2.0)
+        theta = math.pi / 3  # 60 degrees
+        sim.reset(x=1, y=2, theta=theta, steering_angle=0.0)
+
+        distance = 4.0
+        num_points = 5
+        proj_x, proj_y = sim.get_projected_path(distance=distance, num_points=num_points)
+
+        # Path should start at front wheel position
+        front_x, front_y = sim.get_front_wheel_pos()
+        assert abs(proj_x[0] - front_x) < 0.001
+        assert abs(proj_y[0] - front_y) < 0.001
+
+        # Verify points lie on straight line with correct heading
+        for i in range(len(proj_x)):
+            t = i / (num_points - 1)
+            expected_x = front_x + t * distance * math.cos(theta)
+            expected_y = front_y + t * distance * math.sin(theta)
+            assert abs(proj_x[i] - expected_x) < 0.001
+            assert abs(proj_y[i] - expected_y) < 0.001
+
+    def test_projected_path_turning_motion(self) -> None:
+        """
+        Test projected path calculation for turning motion.
+
+        Rationale: When steering angle is non-zero, the path should be a circular arc.
+        This tests the bicycle kinematics calculation of the instantaneous center
+        of rotation and the resulting circular path.
+        """
+        wheelbase = 2.0
+        sim = BicycleModel(wheelbase=wheelbase)
+        steering_angle = math.radians(30)  # 30 degrees
+        sim.reset(x=0, y=0, theta=0, steering_angle=steering_angle)
+
+        distance = 3.0
+        num_points = 10
+        proj_x, proj_y = sim.get_projected_path(distance=distance, num_points=num_points)
+
+        assert len(proj_x) == num_points
+        assert len(proj_y) == num_points
+
+        # Path should start at front wheel position
+        front_x, front_y = sim.get_front_wheel_pos()
+        assert abs(proj_x[0] - front_x) < 0.001
+        assert abs(proj_y[0] - front_y) < 0.001
+
+        # For turning motion, path should be curved (not straight)
+        # Check that middle points deviate from straight line
+        straight_line_y = front_y  # Would be constant for straight motion at theta=0
+        middle_point_y = proj_y[len(proj_y) // 2]
+        assert abs(middle_point_y - straight_line_y) > 0.1  # Should deviate significantly
+
+        # Verify the path curves in the expected direction
+        # Positive steering angle should curve left (positive y direction)
+        assert proj_y[-1] > proj_y[0]  # End point should be higher than start
+
+    def test_projected_path_turning_radius_consistency(self) -> None:
+        """
+        Test that projected path follows the expected turning radius.
+
+        Rationale: The projected path should be geometrically consistent with
+        the bicycle kinematics model. All points should lie on a circle with
+        the correct radius around the instantaneous center of rotation.
+        """
+        wheelbase = 2.0
+        sim = BicycleModel(wheelbase=wheelbase)
+        steering_angle = math.radians(45)  # 45 degrees
+        sim.reset(x=0, y=0, theta=0, steering_angle=steering_angle)
+
+        proj_x, proj_y = sim.get_projected_path(distance=2.0, num_points=8)
+
+        # Calculate expected ICR (instantaneous center of rotation)
+        R_rear = wheelbase / math.tan(steering_angle)
+        icr_x = 0 - R_rear * math.sin(0)  # x - R_rear * sin(theta)
+        icr_y = 0 + R_rear * math.cos(0)  # y + R_rear * cos(theta)
+
+        # All projected points should be equidistant from ICR
+        front_x, front_y = sim.get_front_wheel_pos()
+        expected_radius = math.sqrt((front_x - icr_x) ** 2 + (front_y - icr_y) ** 2)
+
+        for x, y in zip(proj_x, proj_y):
+            actual_radius = math.sqrt((x - icr_x) ** 2 + (y - icr_y) ** 2)
+            assert abs(actual_radius - expected_radius) < 0.01
+
+    def test_projected_path_negative_steering(self) -> None:
+        """
+        Test projected path for negative steering angles (right turns).
+
+        Rationale: Verifies that the path calculation works correctly for
+        both left and right turns, with proper sign handling.
+        """
+        sim = BicycleModel(wheelbase=2.0)
+        steering_angle = math.radians(-30)  # -30 degrees (right turn)
+        sim.reset(x=0, y=0, theta=0, steering_angle=steering_angle)
+
+        proj_x, proj_y = sim.get_projected_path(distance=3.0, num_points=10)
+
+        # Path should start at front wheel position
+        front_x, front_y = sim.get_front_wheel_pos()
+        assert abs(proj_x[0] - front_x) < 0.001
+        assert abs(proj_y[0] - front_y) < 0.001
+
+        # Negative steering should curve right (negative y direction)
+        assert proj_y[-1] < proj_y[0]  # End point should be lower than start
+
+    def test_projected_path_small_steering_angle(self) -> None:
+        """
+        Test projected path behavior near zero steering angle.
+
+        Rationale: The implementation switches between straight-line and circular
+        calculations based on a threshold. This test ensures smooth behavior
+        near the switching point.
+        """
+        sim = BicycleModel(wheelbase=2.0)
+
+        # Test very small positive steering angle
+        small_angle = 0.005  # Just below the 0.01 threshold
+        sim.reset(x=0, y=0, theta=0, steering_angle=small_angle)
+        proj_x1, proj_y1 = sim.get_projected_path(distance=5.0, num_points=10)
+
+        # Test very small negative steering angle
+        sim.reset(x=0, y=0, theta=0, steering_angle=-small_angle)
+        proj_x2, proj_y2 = sim.get_projected_path(distance=5.0, num_points=10)
+
+        # Paths should be nearly symmetric
+        for i in range(len(proj_x1)):
+            assert abs(proj_x1[i] - proj_x2[i]) < 0.001  # X coords should be same
+            assert abs(proj_y1[i] + proj_y2[i]) < 0.1  # Y coords should be nearly opposite
+
+    def test_projected_path_parameters(self) -> None:
+        """
+        Test projected path with different distance and point count parameters.
+
+        Rationale: Verifies that the method correctly handles various parameter
+        values and produces appropriately sized outputs.
+        """
+        sim = BicycleModel(wheelbase=2.0)
+        sim.reset(x=0, y=0, theta=0, steering_angle=0.0)
+
+        # Test different numbers of points
+        for num_points in [3, 5, 10, 20]:
+            proj_x, proj_y = sim.get_projected_path(distance=5.0, num_points=num_points)
+            assert len(proj_x) == num_points
+            assert len(proj_y) == num_points
+
+        # Test different distances
+        for distance in [1.0, 3.0, 10.0]:
+            proj_x, proj_y = sim.get_projected_path(distance=distance, num_points=5)
+            front_x, front_y = sim.get_front_wheel_pos()
+            
+            # Last point should be approximately at the specified distance
+            actual_distance = math.sqrt(
+                (proj_x[-1] - front_x) ** 2 + (proj_y[-1] - front_y) ** 2
+            )
+            assert abs(actual_distance - distance) < 0.1
