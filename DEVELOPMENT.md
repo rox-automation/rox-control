@@ -26,17 +26,7 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
 
 * [feat_003] ✅ **COMPLETED** - Track class for waypoint management in [`src/rox_control/tracks.py`](src/rox_control/tracks.py) with tests in [`tests/test_tracks.py`](tests/test_tracks.py)
 
-* [feat_004] - Track generator functions in `src/tools/tracks.py`
-    - **Function signature:** `generate_track(track_type: str, **kwargs) -> Track`
-    - **Supported track types:**
-      - `"square"` - Parameterized square path with `size: float = 1.0`, `resolution: int = 4`
-      - `"circle"` - Circular path with `radius: float = 1.0`, `center: Vector = Vector(0,0)`, `resolution: int = 16`
-      - `"figure8"` - Figure-8 pattern with `size: float = 1.0`, `resolution: int = 32`
-    - **Features:**
-      - Consistent waypoint spacing via optional `spacing: float` parameter
-      - Parameter validation with clear error messages
-      - Returns properly initialized `Track` objects
-    - Add unit tests for all track types and parameter combinations
+* [feat_004] ✅ **COMPLETED** - Track generator functions in [`src/tools/tracks.py`](src/tools/tracks.py) with tests in [`tests/test_track_generators.py`](tests/test_track_generators.py)
 
 * [feat_005] - Pure pursuit controller in `src/rox_control/controllers.py` (new module)
     - **Class-based design:** `PurePursuitController` with clean stateful interface
