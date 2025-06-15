@@ -47,14 +47,13 @@ def _generate_square_track(size: float = 1.0) -> Track:
     if size <= 0:
         raise ValueError("Size must be positive")
 
-    # Define square corners plus closing point
-    half_size = size / 2
+    # Define square starting at origin (0,0) going clockwise
     waypoints = [
-        Vector(-half_size, -half_size),  # Bottom-left
-        Vector(half_size, -half_size),  # Bottom-right
-        Vector(half_size, half_size),  # Top-right
-        Vector(-half_size, half_size),  # Top-left
-        Vector(-half_size, -half_size),  # Close the loop
+        Vector(0, 0),        # Start at origin
+        Vector(size, 0),     # Right
+        Vector(size, size),  # Top-right  
+        Vector(0, size),     # Top-left
+        Vector(0, 0),        # Back to start
     ]
 
     return Track(waypoints)  # type: ignore[arg-type]
