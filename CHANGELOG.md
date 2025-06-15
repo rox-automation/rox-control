@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+- **Track class** for waypoint management (feat_003)
+  - Inherits from `UserList` for list-like behavior with full indexing support
+  - Uses `rox_vectors.Vector` for waypoints with complete type annotation coverage
+  - Core tracking logic with `find_next_idx(xy: Vector) -> int` method
+  - `target_reached` property for track completion detection
+  - Automatic Vector conversion from tuples/lists in constructor
+  - Validation ensures minimum 2 waypoints requirement
+  - Private `_next_idx` attribute for internal state management
+  - Comprehensive test suite with 20 test cases covering edge cases
+  - 100% test coverage (26/26 statements)
+
 ## [0.1.0] - 2025-06-15
 
 ### Added

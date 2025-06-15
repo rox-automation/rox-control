@@ -29,10 +29,10 @@
 NOTE: "track" term is used for a series of waypoints that a robot must follow. This was previusly
 often named "path", which has a conflicting meaning with filepath. Therefore useage of "track" is preferred.
 
-This functionality should go into `tools/tracks.py`.
+This functionality should go into `src/rox_control/tracks.py`.
 For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pursuit_2.py`
 
-* [feat_003] - `Track` class for waypoint management in `src/tools/tracks.py`
+* [feat_003] ✅ **COMPLETED** - `Track` class for waypoint management in `src/rox_control/tracks.py`
     - Port functionality from `Waypoints` class (see reference implementation)
     - Inherit from `UserList` for list-like behavior with indexing support
     - Use `rox_vectors.Vector` for waypoints with full type annotation coverage
@@ -41,9 +41,9 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
       - `target_reached` property - check if end of track reached
     - **Features:**
       - Automatic Vector conversion in `__init__` for tuples/lists
-      - Private `next_idx` attribute for internal state management
+      - Private `_next_idx` attribute for internal state management
       - Validation: Ensure minimum 2 waypoints on creation
-    - Add comprehensive unit tests with edge cases
+    - Added comprehensive unit tests with edge cases (20 test cases, 100% coverage)
 
 * [feat_004] - Track generator functions in `src/tools/tracks.py`
     - **Function signature:** `generate_track(track_type: str, **kwargs) -> Track`
@@ -163,10 +163,10 @@ Open in VS Code and select "Reopen in Container" for a pre-configured developmen
 ### Completed Features
 
 **Static Visualization (feat_001, feat_002)**
-- API: `plot_simulation_results(states: list[RobotState], model: BicycleModel)`
-- Uses the same `BicycleModel` instance that generated the states for consistency
-- Front/rear wheel positions calculated using `model.get_front_wheel_pos()`
-- Data extraction separated into `extract_trajectory_data()` helper function
-- Matplotlib added as dev dependency only (visualization tooling)
-- Example integration demonstrates graceful matplotlib dependency handling
-- Smoke tests optimized for CI/CD speed (0.39s total test time)
+- Implementation: [`src/tools/plot.py`](src/tools/plot.py) - `plot_simulation_results()` function
+- Example usage: [`examples/01_basic_simulation.py`](examples/01_basic_simulation.py)
+- Tests: [`tests/test_smoke.py`](tests/test_smoke.py) - import validation
+
+**Track Class (feat_003)**
+- Implementation: [`src/rox_control/tracks.py`](src/rox_control/tracks.py) - `Track` class with UserList inheritance
+- Tests: [`tests/test_tracks.py`](tests/test_tracks.py) - 20 test cases with 100% coverage
