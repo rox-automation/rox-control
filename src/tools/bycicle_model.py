@@ -8,6 +8,8 @@ Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 import math
 from typing import NamedTuple
 
+import numpy as np
+
 
 class RobotState(NamedTuple):
     """Represents the state of the robot in the simulation"""
@@ -172,3 +174,55 @@ class BicycleModel:
         )
 
         return self.state
+
+    def get_front_wheel_pos(self) -> tuple[float, float]:
+        """Get front wheel position based on current state and wheelbase."""
+        front_x: float = self.state.x + self.wheelbase * math.cos(self.state.theta)
+        front_y: float = self.state.y + self.wheelbase * math.sin(self.state.theta)
+        return front_x, front_y
+
+    def get_projected_path(
+        self, distance: float = 5.0, num_points: int = 20
+    ) -> tuple[list[float], list[float]]:
+        """Get projected path based on current steering angle.
+
+        Args:
+            distance: How far ahead to project the path in meters
+            num_points: Number of points to generate along the path
+
+        Returns:
+            Tuple of (x_coords, y_coords) lists representing the projected path
+        """
+        # Start from front wheel position
+        front_x, front_y = self.get_front_wheel_pos()
+
+        # Create parameter array
+        t: np.ndarray = np.linspace(0, 1, num_points)
+
+        if abs(self.state.steering_angle) < 0.01:  # Going straight
+            d: np.ndarray = t * distance
+            proj_x: np.ndarray = front_x + d * math.cos(self.state.theta)
+            proj_y: np.ndarray = front_y + d * math.sin(self.state.theta)
+            return proj_x.tolist(), proj_y.tolist()
+
+        # Calculate turning radius for rear wheel
+        R_rear: float = self.wheelbase / math.tan(self.state.steering_angle)
+
+        # Instantaneous center of rotation (ICR)
+        icr_x: float = self.state.x - R_rear * math.sin(self.state.theta)
+        icr_y: float = self.state.y + R_rear * math.cos(self.state.theta)
+
+        # Calculate radius for front wheel (distance from ICR to front wheel)
+        R_front: float = math.sqrt((front_x - icr_x) ** 2 + (front_y - icr_y) ** 2)
+
+        # Calculate projected path starting from front wheel
+        start_angle: float = math.atan2(front_y - icr_y, front_x - icr_x)
+        arc_length: float = distance / R_front
+
+        angles: np.ndarray = start_angle + t * arc_length * np.sign(
+            self.state.steering_angle
+        )
+        proj_x = icr_x + R_front * np.cos(angles)
+        proj_y = icr_y + R_front * np.sin(angles)
+
+        return proj_x.tolist(), proj_y.tolist()

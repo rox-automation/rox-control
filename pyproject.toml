@@ -9,6 +9,7 @@ name = "rox-control"
 dynamic = ["version"]
 dependencies = [
     "rox-vectors",
+    "numpy",
 ]
 description = "Controllers for path following"
 authors = [
