@@ -12,6 +12,7 @@ import math
 import time
 
 from rox_control.controllers import PurePursuitA
+from tools.animation import SimulationFrame, animate_simulation
 from tools.bicicle_model import BicycleModel, RobotState
 from tools.simulation import present_results
 from tools.tracks import generate_track
@@ -19,8 +20,8 @@ from tools.tracks import generate_track
 
 def run_pure_pursuit_simulation(
     controller: PurePursuitA, model: BicycleModel, dt: float = 0.01
-) -> list[RobotState]:
-    """Run pure pursuit simulation with timeout safety."""
+) -> tuple[list[RobotState], list[SimulationFrame]]:
+    """Run pure pursuit simulation with timeout safety and debug data capture."""
 
     # KISS timeout calculation: track_length / target_velocity * 5
     track_length = 80.0  # 20m square perimeter
@@ -36,6 +37,7 @@ def run_pure_pursuit_simulation(
     print()
 
     states = [model.state]
+    frames = []
 
     for step in range(max_steps):
         # Get control command
@@ -51,6 +53,16 @@ def run_pure_pursuit_simulation(
         new_state = model.step(dt)
         states.append(new_state)
 
+        # Capture debug frame for animation
+        front_wheel_pos = model.get_front_wheel_pos()
+        frame = SimulationFrame(
+            step=step,
+            robot_state=new_state,
+            control_output=control_output,
+            front_wheel_pos=front_wheel_pos,
+        )
+        frames.append(frame)
+
         # Progress reporting (every 20 steps like reference)
         if step % 20 == 0 or step < 10:
             print(
@@ -63,7 +75,7 @@ def run_pure_pursuit_simulation(
         print(f"Simulation timeout after {timeout:.1f}s ({len(states)} steps)")
         print("Controller may have failed to reach target")
 
-    return states
+    return states, frames
 
 
 def main() -> None:
@@ -95,26 +107,21 @@ def main() -> None:
     controller.set_track(track)
 
     # Run simulation
-    states = run_pure_pursuit_simulation(controller, model)
+    states, frames = run_pure_pursuit_simulation(controller, model)
 
     t_end = time.time()
     present_results(states, t_end - t_start)
 
-    # Generate plot if matplotlib available
-    print("\nGenerating plots...")
+    # Generate animation for debugging
+    print("\nStarting debug animation...")
     try:
-        import matplotlib.pyplot as plt
-
-        from tools.plot import plot_simulation_results
-
-        plot_simulation_results(states, model, track)
-        plt.show()
-        print("Plots displayed successfully!")
+        animate_simulation(frames, track, animation_speed=2.0, show_debug_info=True)
+        print("Animation completed successfully!")
 
     except ImportError:
-        print("Matplotlib not available - skipping plot generation")
+        print("Matplotlib not available - skipping animation")
     except Exception as e:
-        print(f"Error generating plots: {e}")
+        print(f"Error generating animation: {e}")
 
 
 if __name__ == "__main__":
