@@ -30,11 +30,22 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
 
 * [feat_005] ✅ **COMPLETED** - Pure pursuit A controller in [`src/rox_control/controllers/pure_pursuit_a.py`](src/rox_control/controllers/pure_pursuit_a.py) with tests in [`tests/test_controllers.py`](tests/test_controllers.py)
 
-* [feat_006] - example of Pure Pursuit A controller in `examples/02_pure_pursuit_a.py`:
-  - run simulation and display resulting plot
-  - use square track (20x5 meters)
-  - the code should function like `temp/external/python-robotics/examples/pure_pursuit/pure_pursuit_2.py`, but use code implementeed in features 3,4,5.
-  - example should look like `examples/01_basic_simulation.py`. Use similar style. Avoid duplicating code, if required, move to separate module, in `tools`. For example `present_results` function is a good candidate.
+* [feat_006] 🔄 **WIP** - Pure Pursuit A controller example in `examples/02_pure_pursuit_a.py`:
+  - ✅ Basic implementation with timeout safety and track visualization
+  - ✅ Clean control interface using `set_control_command(curvature, velocity)`
+  - ✅ 20m x 20m square track with scaled parameters
+  - ❌ **ISSUE**: Controller behavior shows poor path following in plots - needs debugging
+  - **Status**: Implementation complete but controller tuning/debugging required
+
+* [feat_007] - Animation debugging tool in `src/tools/animation.py`:
+  - `animate_simulation(states, controller_outputs, track)` - step-by-step replay
+  - Show robot position, heading, and front wheel position at each timestep
+  - Visualize track waypoints and current target point from controller
+  - Display controller debug info: lookahead point, projected position, angle error
+  - Configurable playback speed for detailed analysis
+  - Enable/disable different visualization layers (track, target, lookahead, etc.)
+  - **Purpose**: Debug controller behavior and tune parameters visually
+
 
 **Architectural Considerations:**
 - **Module Organization:** ✅ Controllers organized in `src/rox_control/controllers/` directory structure
@@ -53,11 +64,7 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
 
 **Animation Tools**
 
-* Create `src/tools/animation.py` with live animation functions
-    - `animate_simulation(states: list[RobotState])` - replay with matplotlib animation
-    - Progressive state replay with configurable playbook speed
-    - Show projected path curve for front wheel during replay
-    - Reference: `temp/external/python-robotics/temp/mpl_visualizer.py:369-443`
+
 
 
 * Create `examples/02_animate.py`
