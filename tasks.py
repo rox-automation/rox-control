@@ -1,8 +1,8 @@
 # type: ignore
 import os
 import time
-from invoke import task
 
+from invoke import task
 
 
 @task
@@ -36,7 +36,6 @@ def test(ctx):
     Run tests with coverage reporting to ensure code functionality and quality.
     """
     ctx.run("uv run pytest --cov=src --cov-report term-missing tests", pty=True)
-
 
 
 @task
@@ -78,7 +77,6 @@ def ci(ctx):
     finally:
         t_end = time.time()
         print(f"CI run took {t_end - t_start:.1f} seconds")
-
 
 
 @task

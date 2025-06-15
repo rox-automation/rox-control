@@ -35,7 +35,9 @@ class TestBicycleSim:
         assert sim.wheelbase == 3.0
 
         # Test state assignment functionality
-        sim.state = RobotState(x=1.0, y=2.0, theta=math.pi / 4, v=5.0, steering_angle=0.1)
+        sim.state = RobotState(
+            x=1.0, y=2.0, theta=math.pi / 4, v=5.0, steering_angle=0.1
+        )
         sim.velocity_model.val = 5.0
         sim.velocity_model.setpoint = 5.0
         sim.steering_model.val = 0.1
