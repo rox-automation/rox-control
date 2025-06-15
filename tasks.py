@@ -48,6 +48,14 @@ def create_venv(ctx):
 
 
 @task
+def install(ctx):
+    """
+    Install the package in development mode with all dependencies.
+    """
+    ctx.run('uv pip install -e ".[dev]"')
+
+
+@task
 def uml(ctx):
     """
     Generate UML diagrams from the source code using pyreverse.

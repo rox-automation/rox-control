@@ -8,6 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Create virtual environment and install dependencies
 invoke create-venv
 
+# Install package in development mode (in existing venv)
+invoke install
+
 # Run tests with coverage
 invoke test
 
