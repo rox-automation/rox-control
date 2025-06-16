@@ -93,13 +93,29 @@ def main() -> None:
     try:
         import matplotlib.pyplot as plt
 
-        from tools.plot import create_simulation_data, plot_simulation_data
+        from tools.plot import plot_simulation_data
+        from tools.simulation import SimulationData, SimulationState
+
+        # Convert RobotState list to SimulationState list (no debug data for basic simulation)
+        simulation_states = [
+            SimulationState(
+                x=state.x,
+                y=state.y,
+                theta=state.theta,
+                v=state.v,
+                steering_angle=state.steering_angle,
+                time=state.time,
+                front_x=state.front_x,
+                front_y=state.front_y,
+            )
+            for state in states
+        ]
 
         # Create simulation data for visualization (feat_008)
-        simulation_data = create_simulation_data(states=states)
+        simulation_data = SimulationData(states=simulation_states)
 
-        # Plot using new decoupled approach
-        plot_simulation_data(simulation_data)
+        # Plot using new decoupled approach - unified interface
+        plot_simulation_data(simulation_data, animate=False)
         plt.show()
         print("Plots displayed successfully!")
 

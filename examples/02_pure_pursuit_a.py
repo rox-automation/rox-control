@@ -13,15 +13,15 @@ import time
 
 from rox_control.controllers import PurePursuitA
 from tools.bicicle_model import BicycleModel, RobotState
-from tools.plot import create_simulation_data, plot_simulation_data
-from tools.simulation import present_results
+from tools.plot import plot_simulation_data
+from tools.simulation import SimulationData, SimulationState, present_results
 from tools.tracks import generate_track
 
 
 def run_pure_pursuit_simulation(
     controller: PurePursuitA, model: BicycleModel, dt: float = 0.01
-) -> list[RobotState]:
-    """Run pure pursuit simulation with timeout safety."""
+) -> list[SimulationState]:
+    """Run pure pursuit simulation with timeout safety and debug data collection."""
 
     # KISS timeout calculation: track_length / target_velocity * 5
     track_length = 80.0  # 20m square perimeter
@@ -36,7 +36,20 @@ def run_pure_pursuit_simulation(
     print(f"  Time step: {dt}s")
     print()
 
-    states = [model.state]
+    # Create initial SimulationState with no debug data
+    initial_state = model.state
+    states = [
+        SimulationState(
+            x=initial_state.x,
+            y=initial_state.y,
+            theta=initial_state.theta,
+            v=initial_state.v,
+            steering_angle=initial_state.steering_angle,
+            time=initial_state.time,
+            front_x=initial_state.front_x,
+            front_y=initial_state.front_y,
+        )
+    ]
 
     for step in range(max_steps):
         # Get control command
@@ -50,7 +63,30 @@ def run_pure_pursuit_simulation(
         # Apply control and step simulation
         model.set_control_command(control_output.curvature, control_output.velocity)
         new_state = model.step(dt)
-        states.append(new_state)
+
+        # Calculate projected path for debug visualization
+        projected_path = None
+        try:
+            proj_x, proj_y = model.get_projected_path(distance=8.0, num_points=30)
+            projected_path = list(zip(proj_x, proj_y, strict=False))
+        except Exception:
+            # If projected path calculation fails, continue without it
+            pass
+
+        # Create SimulationState with debug data
+        simulation_state = SimulationState(
+            x=new_state.x,
+            y=new_state.y,
+            theta=new_state.theta,
+            v=new_state.v,
+            steering_angle=new_state.steering_angle,
+            time=new_state.time,
+            front_x=new_state.front_x,
+            front_y=new_state.front_y,
+            controller_output=control_output,
+            projected_path=projected_path,
+        )
+        states.append(simulation_state)
 
         # Progress reporting (every 20 steps like reference)
         if step % 20 == 0 or step < 10:
@@ -99,31 +135,30 @@ def main() -> None:
     states = run_pure_pursuit_simulation(controller, model)
 
     t_end = time.time()
-    present_results(states, t_end - t_start)
 
-    # Generate animation for debugging
+    # Convert SimulationState list to RobotState list for present_results (legacy compatibility)
+    robot_states = [
+        RobotState(
+            x=state.x,
+            y=state.y,
+            theta=state.theta,
+            v=state.v,
+            steering_angle=state.steering_angle,
+            time=state.time,
+            front_x=state.front_x,
+            front_y=state.front_y,
+        )
+        for state in states
+    ]
+    present_results(robot_states, t_end - t_start)
+
+    # Generate animation for debugging with unified interface
     print("\nStarting debug animation...")
     try:
-        # Create fresh track and controller for animation (to avoid state contamination)
-        animation_track = generate_track("square", size=20.0)
-        animation_controller = PurePursuitA(
-            look_ahead_distance=2.0,
-            velocity_vector_length=1.0,
-            proportional_gain=1.0,
-            target_speed=5.0,
-        )
-        animation_controller.set_track(animation_track)
+        # Create simulation data with debug data already populated during simulation (feat_008)
+        simulation_data = SimulationData(states=states, track=track)
 
-        # Create simulation data with pre-computed controller outputs and projected paths (feat_008)
-        simulation_data = create_simulation_data(
-            states=states,
-            track=animation_track,
-            controller=animation_controller,
-            model=model,
-            include_projected_paths=True,
-        )
-
-        # Plot using new decoupled approach
+        # Plot using unified interface - same function call, just different animate parameter
         plot_simulation_data(
             data=simulation_data,
             animate=True,
