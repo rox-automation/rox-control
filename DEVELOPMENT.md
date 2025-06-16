@@ -30,65 +30,9 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
 
 * [feat_005] ✅ **COMPLETED** - Pure pursuit A controller in [`src/rox_control/controllers/pure_pursuit_a.py`](src/rox_control/controllers/pure_pursuit_a.py) with tests in [`tests/test_controllers.py`](tests/test_controllers.py)
 
-* [feat_006] 🔄 **WIP** - Pure Pursuit A controller example in `examples/02_pure_pursuit_a.py`:
-  - ✅ Basic implementation with timeout safety and track visualization
-  - ✅ Clean control interface using `set_control_command(curvature, velocity)`
-  - ✅ 20m x 20m square track with scaled parameters
-  - ❌ **ISSUE**: Controller behavior shows poor path following in plots - needs debugging
-  - **Status**: Implementation complete but controller tuning/debugging required
+* [feat_006] ✅ **COMPLETED** - Pure Pursuit A controller example in [`examples/02_pure_pursuit_a.py`](examples/02_pure_pursuit_a.py) - Complete simulation with 20m square track, timeout safety, and integrated animation debugging
 
-* [feat_007] - Animation debugging tool in `src/tools/animation.py`:
-  - `animate_simulation(states, controller_outputs, track)` - step-by-step replay
-  - Show robot position, heading, and front wheel position at each timestep
-  - Visualize track waypoints and current target point from controller
-  - Display controller debug info: lookahead point, projected position, angle error
-  - Configurable playback speed for detailed analysis
-  - Enable/disable different visualization layers (track, target, lookahead, etc.)
-  - **Purpose**: Debug controller behavior and tune parameters visually
-
-
-**Architectural Considerations:**
-- **Module Organization:** ✅ Controllers organized in `src/rox_control/controllers/` directory structure
-  - Each controller in separate file with descriptive name (e.g., `pure_pursuit_a.py`)
-  - Exported with clear names via `__init__.py` (e.g., `PurePursuitA`)
-  - Shared `ControlOutput` dataclass for consistent interface across controllers
-- **Testing Strategy:** ✅ Comprehensive unit tests with edge cases implemented
-  - Core library features have full test coverage (empty tracks, single waypoint, malformed data)
-  - Code in `tools` may have less strict testing requirements
-- **Type Safety:** ✅ Full mypy compliance achieved with proper type annotations
-- **Documentation:** ✅ One-line docstrings added for all classes and non-trivial functions
-
-
-
-### Not planned yet
-
-**Animation Tools**
-
-
-
-
-* Create `examples/02_animate.py`
-    - Use `examples/01_basic_simulation.py` as a base (import functions).
-    - use `RobotState` objects to create an animation.
-
-
-
-*  Extend `src/tools/plot.py` with additional plot types
-    - Trajectory analysis plots (curvature, acceleration profiles)
-    - Multi-simulation comparison capabilities
-
-* Extend `src/tools/animation.py` with interactive features
-    - Play/pause controls, speed adjustment
-    - Real-time parameter display overlay
-
-**Integration & Production Features**
-
-* [feat_008] Add visualization examples to package documentation
-
-* [feat_009] Create configuration-driven simulation scenarios
-
-* [feat_010] Add export capabilities (PNG/PDF for plots, GIF/MP4 for animations)
-
+* [feat_007] ✅ **COMPLETED** - Animation debugging tool unified in [`src/tools/plot.py`](src/tools/plot.py) - Real-time controller visualization with debug overlays, projected paths, and configurable animation speed
 
 ## Tooling
 
