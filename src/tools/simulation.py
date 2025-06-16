@@ -6,10 +6,30 @@ Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 """
 
 import math
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from rox_control.tracks import Track
+from tools.bicicle_model import RobotState
+
 if TYPE_CHECKING:
-    from tools.bicicle_model import RobotState
+    from rox_control.controllers.pure_pursuit_a import ControlOutput
+
+
+@dataclass(frozen=True)
+class SimulationState(RobotState):
+    """Extended robot state with optional debug data for visualization."""
+
+    controller_output: "ControlOutput | None" = None
+    projected_path: list[tuple[float, float]] | None = None
+
+
+@dataclass(frozen=True)
+class SimulationData:
+    """Pre-computed simulation data for visualization."""
+
+    states: list[SimulationState]
+    track: Track | None = None
 
 
 def present_results(states: list["RobotState"], execution_time: float) -> None:

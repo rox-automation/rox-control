@@ -24,25 +24,25 @@ class TestSquareTrack:
         track = generate_track("square")
         assert len(track) == 5  # 4 corners + closing point
 
-        # Check that waypoints form a square centered at origin
+        # Check that waypoints form a square starting at origin
         waypoints = list(track)
-        assert waypoints[0] == Vector(-0.5, -0.5)  # Bottom-left
-        assert waypoints[1] == Vector(0.5, -0.5)  # Bottom-right
-        assert waypoints[2] == Vector(0.5, 0.5)  # Top-right
-        assert waypoints[3] == Vector(-0.5, 0.5)  # Top-left
-        assert waypoints[4] == Vector(-0.5, -0.5)  # Closing point
+        assert waypoints[0] == Vector(0.0, 0.0)  # Start at origin
+        assert waypoints[1] == Vector(1.0, 0.0)  # Right
+        assert waypoints[2] == Vector(1.0, 1.0)  # Top-right
+        assert waypoints[3] == Vector(0.0, 1.0)  # Top-left
+        assert waypoints[4] == Vector(0.0, 0.0)  # Back to start
 
     def test_custom_size(self):
         """Test square with custom size."""
         track = generate_track("square", size=2.0)
         waypoints = list(track)
 
-        # Should have corners at ±1.0 (half of size=2.0)
-        assert waypoints[0] == Vector(-1.0, -1.0)  # Bottom-left
-        assert waypoints[1] == Vector(1.0, -1.0)  # Bottom-right
-        assert waypoints[2] == Vector(1.0, 1.0)  # Top-right
-        assert waypoints[3] == Vector(-1.0, 1.0)  # Top-left
-        assert waypoints[4] == Vector(-1.0, -1.0)  # Closing point
+        # Should start at origin with side length 2.0
+        assert waypoints[0] == Vector(0.0, 0.0)  # Start at origin
+        assert waypoints[1] == Vector(2.0, 0.0)  # Right
+        assert waypoints[2] == Vector(2.0, 2.0)  # Top-right
+        assert waypoints[3] == Vector(0.0, 2.0)  # Top-left
+        assert waypoints[4] == Vector(0.0, 0.0)  # Back to start
 
     def test_square_is_closed_loop(self):
         """Test that square forms a closed loop."""

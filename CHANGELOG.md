@@ -38,6 +38,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - 96% test coverage (47/49 statements)
 
 ### Changed
+- **Visualization architecture refactored** (feat_008)
+  - Moved `SimulationData` and `SimulationState` classes to `src/tools/simulation.py`
+  - Changed `RobotState` from `NamedTuple` to `@dataclass` for cleaner inheritance
+  - `SimulationState` extends `RobotState` with optional debug data (`controller_output`, `projected_path`)
+  - Unified plotting interface: `plot_simulation_data(data, animate=False/True)` for both static and animated plots
+  - True decoupling: debug data populated during simulation, not post-visualization calculation
 - **Controller organization**: Moved from single file to modular directory structure
   - Controllers now organized in `src/rox_control/controllers/` directory
   - Each controller implemented in separate file (e.g., `pure_pursuit_a.py`)
@@ -48,7 +54,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - **BicycleModel** class with realistic bicycle kinematics simulation
-  - Rate-limited steering and acceleration 
+  - Rate-limited steering and acceleration
   - Configurable wheelbase, max steering angle, and acceleration limits
   - State tracking with time progression
 - **Geometric methods** for bicycle model
