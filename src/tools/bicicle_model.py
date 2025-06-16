@@ -6,12 +6,13 @@ Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 """
 
 import math
-from typing import NamedTuple
+from dataclasses import dataclass
 
 import numpy as np
 
 
-class RobotState(NamedTuple):
+@dataclass(frozen=True)
+class RobotState:
     """Represents the state of the robot in the simulation"""
 
     x: float = 0.0  # X position (rear wheel)
