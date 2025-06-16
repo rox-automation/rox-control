@@ -9,3 +9,11 @@ def test_imports() -> None:
 
 def test_version() -> None:
     print(rox_control.__version__)
+
+
+def test_simulation() -> None:
+
+    from tools.simulation import SimulationData, SimulationState
+
+    _ = SimulationState()
+    _ = SimulationData(states=[], track=None)
