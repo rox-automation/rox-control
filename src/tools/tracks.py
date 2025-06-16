@@ -49,11 +49,11 @@ def _generate_square_track(size: float = 1.0) -> Track:
 
     # Define square starting at origin (0,0) going clockwise
     waypoints = [
-        Vector(0, 0),        # Start at origin
-        Vector(size, 0),     # Right
-        Vector(size, size),  # Top-right  
-        Vector(0, size),     # Top-left
-        Vector(0, 0),        # Back to start
+        Vector(0, 0),  # Start at origin
+        Vector(size, 0),  # Right
+        Vector(size, size),  # Top-right
+        Vector(0, size),  # Top-left
+        Vector(0, 0),  # Back to start
     ]
 
     return Track(waypoints)  # type: ignore[arg-type]

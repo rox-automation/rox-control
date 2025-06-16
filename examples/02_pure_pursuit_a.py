@@ -12,7 +12,7 @@ import math
 import time
 
 from rox_control.controllers import PurePursuitA
-from tools.animation import SimulationFrame, animate_simulation
+from tools.plot import plot_simulation_results
 from tools.bicicle_model import BicycleModel, RobotState
 from tools.simulation import present_results
 from tools.tracks import generate_track
@@ -20,8 +20,8 @@ from tools.tracks import generate_track
 
 def run_pure_pursuit_simulation(
     controller: PurePursuitA, model: BicycleModel, dt: float = 0.01
-) -> tuple[list[RobotState], list[SimulationFrame]]:
-    """Run pure pursuit simulation with timeout safety and debug data capture."""
+) -> list[RobotState]:
+    """Run pure pursuit simulation with timeout safety."""
 
     # KISS timeout calculation: track_length / target_velocity * 5
     track_length = 80.0  # 20m square perimeter
@@ -37,7 +37,6 @@ def run_pure_pursuit_simulation(
     print()
 
     states = [model.state]
-    frames = []
 
     for step in range(max_steps):
         # Get control command
@@ -53,16 +52,6 @@ def run_pure_pursuit_simulation(
         new_state = model.step(dt)
         states.append(new_state)
 
-        # Capture debug frame for animation
-        front_wheel_pos = model.get_front_wheel_pos()
-        frame = SimulationFrame(
-            step=step,
-            robot_state=new_state,
-            control_output=control_output,
-            front_wheel_pos=front_wheel_pos,
-        )
-        frames.append(frame)
-
         # Progress reporting (every 20 steps like reference)
         if step % 20 == 0 or step < 10:
             print(
@@ -75,7 +64,7 @@ def run_pure_pursuit_simulation(
         print(f"Simulation timeout after {timeout:.1f}s ({len(states)} steps)")
         print("Controller may have failed to reach target")
 
-    return states, frames
+    return states
 
 
 def main() -> None:
@@ -107,7 +96,7 @@ def main() -> None:
     controller.set_track(track)
 
     # Run simulation
-    states, frames = run_pure_pursuit_simulation(controller, model)
+    states = run_pure_pursuit_simulation(controller, model)
 
     t_end = time.time()
     present_results(states, t_end - t_start)
@@ -115,7 +104,16 @@ def main() -> None:
     # Generate animation for debugging
     print("\nStarting debug animation...")
     try:
-        animate_simulation(frames, track, animation_speed=2.0, show_debug_info=True)
+        plot_simulation_results(
+            states=states,
+            model=model,
+            track=track,
+            animate=True,
+            controller=controller,
+            animation_speed=2.0,
+            show_projected_path=True,
+            show_debug_info=True
+        )
         print("Animation completed successfully!")
 
     except ImportError:
