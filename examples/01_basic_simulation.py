@@ -88,14 +88,18 @@ def main() -> None:
     t_end = time.time()
     present_results(states, t_end - t_start)
 
-    # Demonstrate plotting functionality (feat_001)
+    # Demonstrate plotting functionality (feat_001, feat_008)
     print("Generating plots...")
     try:
         import matplotlib.pyplot as plt
 
-        from tools.plot import plot_simulation_results
+        from tools.plot import create_simulation_data, plot_simulation_data
 
-        plot_simulation_results(states, model)
+        # Create simulation data for visualization (feat_008)
+        simulation_data = create_simulation_data(states=states)
+
+        # Plot using new decoupled approach
+        plot_simulation_data(simulation_data)
         plt.show()
         print("Plots displayed successfully!")
 

@@ -13,7 +13,7 @@ import time
 
 from rox_control.controllers import PurePursuitA
 from tools.bicicle_model import BicycleModel, RobotState
-from tools.plot import plot_simulation_results
+from tools.plot import create_simulation_data, plot_simulation_data
 from tools.simulation import present_results
 from tools.tracks import generate_track
 
@@ -114,12 +114,19 @@ def main() -> None:
         )
         animation_controller.set_track(animation_track)
 
-        plot_simulation_results(
+        # Create simulation data with pre-computed controller outputs and projected paths (feat_008)
+        simulation_data = create_simulation_data(
             states=states,
-            model=model,
             track=animation_track,
-            animate=True,
             controller=animation_controller,
+            model=model,
+            include_projected_paths=True,
+        )
+
+        # Plot using new decoupled approach
+        plot_simulation_data(
+            data=simulation_data,
+            animate=True,
             animation_speed=2.0,
             show_projected_path=True,
             show_debug_info=True,
