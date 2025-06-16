@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
 from rox_vectors import Vector
-from rox_vectors.vectors import point_on_line
 
 from rox_control.tracks import Track
 
@@ -80,39 +79,31 @@ class Controller:
         robot_xy = Vector(robot_state.x, robot_state.y)
         robot_heading = robot_state.theta
 
-        # Check if track is complete
-        if self._track.target_reached:
-            return ControlOutput(
-                curvature=0.0,
-                velocity=0.0,
-                target_point=robot_xy,
-                future_position=robot_xy,
-                angle_error=0.0,
-                track_complete=True,
-            )
-
-        # Find next waypoint
-        next_idx = self._track.find_next_idx(robot_xy)
-
-        # Handle edge case: beyond track end
-        if next_idx >= len(self._track.data):
-            return ControlOutput(
-                curvature=0.0,
-                velocity=0.0,
-                target_point=robot_xy,
-                future_position=robot_xy,
-                angle_error=0.0,
-                track_complete=True,
-            )
-
-        # Get waypoint segment
-        waypoint_a = self._track.data[next_idx - 1]
-        waypoint_b = self._track.data[next_idx]
-
-        # Calculate target position using pure pursuit algorithm
-        target_point, future_position, angle_error = self._calculate_target_position(
-            robot_xy, robot_heading, waypoint_a, waypoint_b
+        # Find closest segment and project robot onto track
+        segment_idx, projected_point, distance_along = self._track.find_closest_segment(
+            robot_xy
         )
+
+        # Get target point using lookahead distance
+        target_point, track_complete = self._track.get_lookahead_point(
+            segment_idx, distance_along, self.look_ahead_distance
+        )
+
+        # Check if track is complete
+        if track_complete:
+            return ControlOutput(
+                curvature=0.0,
+                velocity=0.0,
+                target_point=robot_xy,
+                future_position=robot_xy,
+                angle_error=0.0,
+                track_complete=True,
+            )
+
+        # Calculate future position and angle error
+        velocity_vector = Vector.from_polar(self.velocity_vector_length, robot_heading)
+        future_position = robot_xy + velocity_vector
+        angle_error = velocity_vector.angle(target_point - robot_xy)
 
         # Calculate curvature command using proportional control
         curvature = self._proportional_control(0.0, angle_error)
@@ -125,42 +116,6 @@ class Controller:
             angle_error=angle_error,
             track_complete=False,
         )
-
-    def _calculate_target_position(
-        self,
-        robot_xy: Vector,
-        robot_heading: float,
-        waypoint_a: Vector,
-        waypoint_b: Vector,
-    ) -> tuple[Vector, Vector, float]:
-        """Calculate lookahead and target positions.
-
-        Ported from reference implementation's target_position function.
-
-        Args:
-            robot_xy: Robot position
-            robot_heading: Robot pose angle in radians
-            waypoint_a: First waypoint of current segment
-            waypoint_b: Second waypoint of current segment
-
-        Returns:
-            Tuple of (target_point, future_position, angle_error)
-        """
-        # Calculate future position (robot velocity projection)
-        velocity_vector = Vector.from_polar(self.velocity_vector_length, robot_heading)
-        future_position = robot_xy + velocity_vector
-
-        # Project future position onto path segment
-        projected_point = point_on_line(waypoint_a, waypoint_b, future_position)
-
-        # Calculate target point with lookahead distance
-        segment_direction = (waypoint_b - waypoint_a) / abs(waypoint_b - waypoint_a)
-        target_point = projected_point + self.look_ahead_distance * segment_direction
-
-        # Calculate angle error for control
-        angle_error = velocity_vector.angle(target_point - robot_xy)
-
-        return target_point, future_position, angle_error
 
     def _proportional_control(self, target: float, current: float) -> float:
         """Proportional controller for angle error.

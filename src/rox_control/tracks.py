@@ -4,7 +4,6 @@
 from collections import UserList
 from typing import Union
 
-import numpy as np
 from rox_vectors import Vector
 
 
@@ -36,43 +35,100 @@ class Track(UserList):
             raise ValueError("Track must contain at least 2 waypoints")
 
         super().__init__(converted_waypoints)
-        self._next_idx: int | None = None
 
-    def find_next_idx(self, xy: Vector) -> int:
-        """Find next waypoint index for path tracking.
-
-        Core tracking logic that maintains internal state for waypoint progression.
-        On first call, finds closest waypoint and advances to next.
-        On subsequent calls, progresses when robot moves closer to next waypoint.
+    def find_closest_segment(self, robot_xy: Vector) -> tuple[int, Vector, float]:
+        """Find closest track segment and project robot onto it.
 
         Args:
-            xy: Current robot position as Vector
+            robot_xy: Current robot position as Vector
 
         Returns:
-            Index of next waypoint to target
+            Tuple of (segment_index, projected_point, distance_along_segment_meters)
         """
-        if self._next_idx is None:  # First time search
-            # Find closest waypoint by distance
-            distances = [abs(pt - xy) for pt in self.data]
-            closest_idx = int(np.argmin(distances))
-            self._next_idx = closest_idx + 1
-        else:
-            # Check if robot has moved closer to next waypoint
-            current_idx = self._next_idx
-            if current_idx < len(self.data):
-                dist_to_current = abs(xy - self.data[current_idx - 1])
-                dist_to_next = abs(xy - self.data[current_idx])
+        if len(self.data) < 2:
+            raise ValueError("Track must have at least 2 waypoints")
 
-                if dist_to_current > dist_to_next:  # Moved closer to next waypoint
-                    self._next_idx += 1
+        min_distance = float("inf")
+        closest_segment_idx = 0
+        closest_projected_point = Vector(0, 0)
+        closest_distance_along = 0.0
 
-        return self._next_idx
+        # Check each segment
+        for i in range(len(self.data) - 1):
+            waypoint_a = self.data[i]
+            waypoint_b = self.data[i + 1]
 
-    @property
-    def target_reached(self) -> bool:
-        """Check if end of track has been reached.
+            # Project robot position onto line segment
+            from rox_vectors.vectors import point_on_line
+
+            projected_point = point_on_line(waypoint_a, waypoint_b, robot_xy)
+
+            # Calculate distance from robot to projected point
+            distance_to_segment = abs(robot_xy - projected_point)
+
+            if distance_to_segment < min_distance:
+                min_distance = distance_to_segment
+                closest_segment_idx = i
+                closest_projected_point = projected_point
+
+                # Calculate distance along segment from waypoint_a to projected point
+                segment_vector = waypoint_b - waypoint_a
+                segment_length = abs(segment_vector)
+                if segment_length > 0:
+                    projection_vector = projected_point - waypoint_a
+                    closest_distance_along = abs(projection_vector)
+                else:
+                    closest_distance_along = 0.0
+
+        return closest_segment_idx, closest_projected_point, closest_distance_along
+
+    def get_lookahead_point(
+        self, segment_idx: int, distance_along_segment: float, lookahead_distance: float
+    ) -> tuple[Vector, bool]:
+        """Get target point at lookahead distance ahead on track.
+
+        Args:
+            segment_idx: Starting segment index
+            distance_along_segment: Distance along segment in meters
+            lookahead_distance: Lookahead distance in meters
 
         Returns:
-            True if robot has progressed beyond final waypoint
+            Tuple of (target_point, track_complete)
         """
-        return self._next_idx is not None and self._next_idx >= len(self.data)
+        if segment_idx >= len(self.data) - 1:
+            # Already at or past the last segment
+            return self.data[-1], True
+
+        remaining_lookahead = lookahead_distance
+        current_segment_idx = segment_idx
+        current_distance_along = distance_along_segment
+
+        # Start from current position on current segment
+        while current_segment_idx < len(self.data) - 1:
+            waypoint_a = self.data[current_segment_idx]
+            waypoint_b = self.data[current_segment_idx + 1]
+            segment_vector = waypoint_b - waypoint_a
+            segment_length = abs(segment_vector)
+
+            # Remaining distance in current segment
+            remaining_in_segment = segment_length - current_distance_along
+
+            if remaining_lookahead <= remaining_in_segment:
+                # Target point is within current segment
+                if segment_length > 0:
+                    segment_direction = segment_vector / segment_length
+                    target_distance_along = current_distance_along + remaining_lookahead
+                    target_point = (
+                        waypoint_a + segment_direction * target_distance_along
+                    )
+                else:
+                    target_point = waypoint_a
+                return target_point, False
+
+            # Move to next segment
+            remaining_lookahead -= remaining_in_segment
+            current_segment_idx += 1
+            current_distance_along = 0.0
+
+        # Lookahead extends beyond track end
+        return self.data[-1], True
