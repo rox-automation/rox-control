@@ -34,6 +34,32 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
 
 * [feat_007] ✅ **COMPLETED** - Animation debugging tool unified in [`src/tools/plot.py`](src/tools/plot.py) - Real-time controller visualization with debug overlays, projected paths, and configurable animation speed
 
+* [feat_008] - **Decouple visualization from simulation objects**. Current `plot_simulation_results()` function violates the design philosophy by requiring `BicycleModel` and `Controller` instances for runtime calculations during visualization.
+
+  **Coupling Issues:**
+  - Function calls `model.get_front_wheel_pos()` and `model.get_projected_path()` during rendering
+  - Animation mode requires `controller.control()` calls for debug visualization
+  - Model state is mutated during visualization (`model.state = state`)
+  - Values are recalculated on every animation frame instead of being pre-computed
+
+  **Proposed Solution:**
+  - **Step 1**: Extend `RobotState` with front wheel position fields:
+    - Add `front_x: float` and `front_y: float` to `RobotState` NamedTuple
+    - Update `BicycleModel.step()` to calculate and include front wheel position in state
+  - **Step 2**: Create `SimulationData` frozen dataclass containing all pre-computed visualization data:
+    - `states: list[RobotState]` - Robot trajectory (now includes front wheel positions)
+    - `track: Track | None` - Track waypoints
+    - `controller_outputs: list[ControlOutput] | None` - Pre-computed controller states for debug
+    - `projected_paths: list[list[tuple[float, float]]] | None` - Pre-calculated projected paths
+  - **Step 3**: Refactor `plot_simulation_results()` to accept only `SimulationData` object
+  - **Step 4**: Move all calculation logic to simulation phase, not visualization phase
+
+  **Benefits:**
+  - True decoupling of visualization from simulation objects
+  - Faster animation (no runtime calculations)
+  - Immutable visualization data
+  - Easier testing of visualization independently
+
 ## Tooling
 
 ### Local Development
