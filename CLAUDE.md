@@ -14,6 +14,9 @@ invoke install
 # Run tests with coverage
 invoke test
 
+# Run a single test file
+pytest tests/test_specific_file.py
+
 # Lint and format code (uses ruff and mypy)
 invoke lint
 
@@ -22,6 +25,9 @@ invoke ci
 
 # Build package
 invoke build_package
+
+# Release to PyPI (requires proper git tag)
+invoke release
 ```
 
 Note: After modifying Python files, always run `ruff check --fix` and `ruff format` (covered by `invoke lint`).
