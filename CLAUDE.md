@@ -44,18 +44,22 @@ Note: After modifying Python files, always run `ruff check --fix` and `ruff form
 
 ### Package Structure
 
-- `src/rox_control/__init__.py` - Main package entry point
+- `src/rox_control/__init__.py` - Main package entry point exposing `Track` and `__version__`
+- `src/rox_control/tracks.py` - Track/waypoint management functionality
+- `src/rox_control/controllers/` - Path tracking controllers (exports `PurePursuitA`, `ControlOutput`)
 - `src/rox_control/version.py` - Version management via setuptools_scm
-- `src/tools/bycicle_sim.py` - Bicycle kinematics simulator for testing controllers
+- `src/tools/` - Supporting simulation, visualization, and bicycle kinematics (not packaged)
+- `examples/` - Usage demonstrations including basic simulation and pure pursuit examples
 
 ### Dependencies
 
 - **rox-vectors**: Core dependency for vector operations
-- **uv**: Package manager for dependency resolution
+- **numpy**: Numerical computing foundation
+- **uv**: Package manager for dependency resolution (not pip)
 - **invoke**: Task automation framework
 - **ruff**: Linting and formatting
-- **mypy**: Static type checking
-- **pytest**: Testing framework
+- **mypy**: Static type checking with strict untyped definitions disallowed
+- **pytest**: Testing framework with coverage reporting
 
 ## Development Workflow
 
