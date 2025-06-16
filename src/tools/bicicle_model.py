@@ -14,12 +14,14 @@ import numpy as np
 class RobotState(NamedTuple):
     """Represents the state of the robot in the simulation"""
 
-    x: float = 0.0  # X position
-    y: float = 0.0  # Y position
+    x: float = 0.0  # X position (rear wheel)
+    y: float = 0.0  # Y position (rear wheel)
     theta: float = 0.0  # Orientation angle in radians
     v: float = 0.0  # Linear velocity
     steering_angle: float = 0.0  # Steering angle in radians
     time: float = 0.0  # Simulation time in seconds
+    front_x: float = 0.0  # X position of front wheel
+    front_y: float = 0.0  # Y position of front wheel
 
 
 class LinearModel:
@@ -164,6 +166,10 @@ class BicycleModel:
         # Update simulation time
         new_time = self.state.time + dt
 
+        # Calculate front wheel position
+        front_x = new_x + self.wheelbase * math.cos(new_theta)
+        front_y = new_y + self.wheelbase * math.sin(new_theta)
+
         # Create new state
         self.state = RobotState(
             x=new_x,
@@ -172,6 +178,8 @@ class BicycleModel:
             v=v,
             steering_angle=phi,
             time=new_time,
+            front_x=front_x,
+            front_y=front_y,
         )
 
         return self.state
