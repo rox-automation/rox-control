@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from rox_control.tracks import Track
 from tools.bicicle_model import RobotState
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from rox_control.controllers.pure_pursuit_a import ControlOutput
 
 
