@@ -15,7 +15,7 @@ from rox_control.controllers import PurePursuitA
 from tools.bicicle_model import BicycleModel, RobotState
 from tools.plot import plot_simulation_data
 from tools.simulation import SimulationData, SimulationState, present_results
-from tools.tracks import generate_track
+from tools.tracks import rectangular_track
 
 
 def run_pure_pursuit_simulation(
@@ -108,7 +108,7 @@ def main() -> None:
     t_start = time.time()
 
     # Create 20m x 20m square track
-    track = generate_track("square", size=20.0)
+    track = rectangular_track(L=50.0, B=10.0)  # 50m perimeter
     print(f"Generated square track with {len(track)} waypoints")
 
     # Create bicycle model with realistic parameters for larger scale
@@ -162,7 +162,7 @@ def main() -> None:
         plot_simulation_data(
             data=simulation_data,
             animate=True,
-            animation_speed=2.0,
+            animation_speed=1.0,
             show_projected_path=True,
             show_debug_info=True,
         )

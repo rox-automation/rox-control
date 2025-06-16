@@ -23,7 +23,7 @@ def generate_track(track_type: str, **kwargs: Any) -> Track:
         ValueError: If track_type is not supported or parameters are invalid
     """
     if track_type == "square":
-        return _generate_square_track(**kwargs)
+        return rectangular_track(**kwargs)
     elif track_type == "circle":
         return _generate_circle_track(**kwargs)
     elif track_type == "figure8":
@@ -32,27 +32,15 @@ def generate_track(track_type: str, **kwargs: Any) -> Track:
         raise ValueError(f"Unsupported track type: {track_type}")
 
 
-def _generate_square_track(size: float = 1.0) -> Track:
-    """Generate square track with parameterized dimensions.
-
-    Args:
-        size: Side length of the square
-
-    Returns:
-        Track with 5 waypoints (4 corners + closing point)
-
-    Raises:
-        ValueError: If size is invalid
-    """
-    if size <= 0:
-        raise ValueError("Size must be positive")
+def rectangular_track(L: float = 10.0, B: float = 5.0) -> Track:
+    """Generate square track with parameterized dimensions."""
 
     # Define square starting at origin (0,0) going clockwise
     waypoints = [
         Vector(0, 0),  # Start at origin
-        Vector(size, 0),  # Right
-        Vector(size, size),  # Top-right
-        Vector(0, size),  # Top-left
+        Vector(L, 0),  # Right
+        Vector(L, B),  # Top-right
+        Vector(0, B),  # Top-left
         Vector(0, 0),  # Back to start
     ]
 

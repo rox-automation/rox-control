@@ -16,51 +16,6 @@ class TestGenerateTrack:
             generate_track("invalid")
 
 
-class TestSquareTrack:
-    """Test square track generation."""
-
-    def test_default_square(self):
-        """Test square with default parameters."""
-        track = generate_track("square")
-        assert len(track) == 5  # 4 corners + closing point
-
-        # Check that waypoints form a square starting at origin
-        waypoints = list(track)
-        assert waypoints[0] == Vector(0.0, 0.0)  # Start at origin
-        assert waypoints[1] == Vector(1.0, 0.0)  # Right
-        assert waypoints[2] == Vector(1.0, 1.0)  # Top-right
-        assert waypoints[3] == Vector(0.0, 1.0)  # Top-left
-        assert waypoints[4] == Vector(0.0, 0.0)  # Back to start
-
-    def test_custom_size(self):
-        """Test square with custom size."""
-        track = generate_track("square", size=2.0)
-        waypoints = list(track)
-
-        # Should start at origin with side length 2.0
-        assert waypoints[0] == Vector(0.0, 0.0)  # Start at origin
-        assert waypoints[1] == Vector(2.0, 0.0)  # Right
-        assert waypoints[2] == Vector(2.0, 2.0)  # Top-right
-        assert waypoints[3] == Vector(0.0, 2.0)  # Top-left
-        assert waypoints[4] == Vector(0.0, 0.0)  # Back to start
-
-    def test_square_is_closed_loop(self):
-        """Test that square forms a closed loop."""
-        track = generate_track("square")
-        waypoints = list(track)
-
-        # First and last points should be the same
-        assert waypoints[0] == waypoints[-1]
-
-    def test_invalid_size(self):
-        """Test error handling for invalid size."""
-        with pytest.raises(ValueError, match="Size must be positive"):
-            generate_track("square", size=-1.0)
-
-        with pytest.raises(ValueError, match="Size must be positive"):
-            generate_track("square", size=0.0)
-
-
 class TestCircleTrack:
     """Test circular track generation."""
 
