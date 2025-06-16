@@ -10,7 +10,6 @@ Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 """
 
 import math
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import matplotlib.animation as animation
@@ -21,68 +20,10 @@ from matplotlib.figure import Figure
 from rox_control.tracks import Track
 
 from .bicicle_model import BicycleModel, RobotState
+from .simulation import SimulationData, SimulationState
 
 if TYPE_CHECKING:
-    from rox_control.controllers.pure_pursuit_a import Controller, ControlOutput
-
-
-@dataclass(frozen=True)
-class SimulationData:
-    """Pre-computed simulation data for visualization."""
-
-    states: list[RobotState]
-    track: Track | None = None
-    controller_outputs: list["ControlOutput"] | None = None
-    projected_paths: list[list[tuple[float, float]]] | None = None
-
-
-def create_simulation_data(
-    states: list[RobotState],
-    track: Track | None = None,
-    controller: "Controller | None" = None,
-    model: BicycleModel | None = None,
-    include_projected_paths: bool = False,
-) -> SimulationData:
-    """
-    Create SimulationData from simulation results.
-
-    This is a helper function to build SimulationData from traditional simulation
-    outputs. For new code, consider calculating controller outputs and projected
-    paths during simulation instead of here.
-
-    Args:
-        states: List of robot states from simulation
-        track: Optional track for visualization
-        controller: Optional controller for debug visualization
-        model: Optional model for projected path calculation
-        include_projected_paths: Whether to calculate projected paths
-
-    Returns:
-        SimulationData ready for visualization
-    """
-    controller_outputs = None
-    projected_paths = None
-
-    # Calculate controller outputs if controller provided
-    if controller is not None:
-        controller_outputs = []
-        for state in states:
-            controller_outputs.append(controller.control(state))
-
-    # Calculate projected paths if model provided
-    if include_projected_paths and model is not None:
-        projected_paths = []
-        for state in states:
-            model.state = state
-            proj_x, proj_y = model.get_projected_path(distance=8.0, num_points=30)
-            projected_paths.append(list(zip(proj_x, proj_y, strict=False)))
-
-    return SimulationData(
-        states=states,
-        track=track,
-        controller_outputs=controller_outputs,
-        projected_paths=projected_paths,
-    )
+    from rox_control.controllers.pure_pursuit_a import Controller
 
 
 def extract_trajectory_data(
@@ -211,18 +152,21 @@ def plot_simulation_results(
         print("Warning: No states provided for plotting")
         return
 
-    # Convert to new SimulationData format
-    data = create_simulation_data(
-        states=states,
-        track=track,
-        controller=controller
-        if animate
-        else None,  # Only compute controller outputs for animation
-        model=model
-        if (animate and show_projected_path)
-        else None,  # Only compute projected paths if needed
-        include_projected_paths=animate and show_projected_path,
-    )
+    # Convert RobotState list to SimulationState list (without debug data for deprecated function)
+    simulation_states = [
+        SimulationState(
+            x=state.x,
+            y=state.y,
+            theta=state.theta,
+            v=state.v,
+            steering_angle=state.steering_angle,
+            time=state.time,
+            front_x=state.front_x,
+            front_y=state.front_y,
+        )
+        for state in states
+    ]
+    data = SimulationData(states=simulation_states, track=track)
 
     # Use new plotting function
     plot_simulation_data(
@@ -361,10 +305,13 @@ def _plot_animated_data(
     (robot_rear_dot,) = ax_traj.plot([], [], "bo", markersize=8, label="Robot Position")
     (robot_front_dot,) = ax_traj.plot([], [], "ro", markersize=6, label="Front Wheel")
 
-    # Controller debug elements (if controller outputs available)
+    # Controller debug elements (if any state has controller output)
     target_dot = None
     lookahead_line = None
-    if data.controller_outputs is not None:
+    has_controller_data = any(
+        state.controller_output is not None for state in data.states
+    )
+    if has_controller_data:
         (target_dot,) = ax_traj.plot([], [], "mo", markersize=8, label="Target Point")
         (lookahead_line,) = ax_traj.plot(
             [], [], "m--", linewidth=2, alpha=0.7, label="Lookahead"
@@ -372,7 +319,8 @@ def _plot_animated_data(
 
     # Projected path
     projected_path_line = None
-    if show_projected_path and data.projected_paths is not None:
+    has_projected_paths = any(state.projected_path is not None for state in data.states)
+    if show_projected_path and has_projected_paths:
         (projected_path_line,) = ax_traj.plot(
             [], [], "c:", linewidth=2, alpha=0.8, label="Projected Path"
         )
@@ -450,12 +398,11 @@ def _plot_animated_data(
 
         # Update controller debug elements (if available)
         if (
-            data.controller_outputs is not None
-            and original_idx < len(data.controller_outputs)
-            and target_dot is not None
+            target_dot is not None
             and lookahead_line is not None
+            and current_state.controller_output is not None
         ):
-            control_output = data.controller_outputs[original_idx]
+            control_output = current_state.controller_output
             # Only show target point and lookahead if track is still active
             if not control_output.track_complete:
                 target_dot.set_data(
@@ -474,10 +421,9 @@ def _plot_animated_data(
         if (
             show_projected_path
             and projected_path_line is not None
-            and data.projected_paths is not None
-            and original_idx < len(data.projected_paths)
+            and current_state.projected_path is not None
         ):
-            projected_path = data.projected_paths[original_idx]
+            projected_path = current_state.projected_path
             proj_x = [p[0] for p in projected_path]
             proj_y = [p[1] for p in projected_path]
             projected_path_line.set_data(proj_x, proj_y)
@@ -504,10 +450,8 @@ def _plot_animated_data(
         debug_str += f"Robot: ({current_state.x:6.2f}, {current_state.y:6.2f})  θ: {math.degrees(current_state.theta):6.1f}°\n"
         debug_str += f"Speed: {current_state.v:5.2f} m/s  Steering: {math.degrees(current_state.steering_angle):6.1f}°"
 
-        if data.controller_outputs is not None and original_idx < len(
-            data.controller_outputs
-        ):
-            control_output = data.controller_outputs[original_idx]
+        if current_state.controller_output is not None:
+            control_output = current_state.controller_output
             if not control_output.track_complete:
                 debug_str += f"\nTarget: ({control_output.target_point.x:6.2f}, {control_output.target_point.y:6.2f})\n"
                 debug_str += f"Curvature: {control_output.curvature:7.4f}  Active: True"
