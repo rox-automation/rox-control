@@ -743,9 +743,9 @@ class TestBicycleSim:
                 curvature, 1.0
             )  # Velocity doesn't matter for this test
 
-            assert (
-                abs(sim.steering_model.setpoint - expected_steering) < 0.001
-            ), f"Failed for wheelbase={wheelbase}, curvature={curvature}"
+            assert abs(sim.steering_model.setpoint - expected_steering) < 0.001, (
+                f"Failed for wheelbase={wheelbase}, curvature={curvature}"
+            )
 
     def test_set_control_command_with_steering_limits(self) -> None:
         """Test set_control_command respects steering angle limits."""

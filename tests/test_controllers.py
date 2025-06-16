@@ -4,9 +4,10 @@
 import math
 
 import pytest
+from rox_vectors import Vector
+
 from rox_control.controllers import ControlOutput, PurePursuitA
 from rox_control.tracks import Track
-from rox_vectors import Vector
 from tools.bicicle_model import RobotState
 
 

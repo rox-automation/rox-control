@@ -3,6 +3,7 @@
 
 import pytest
 from rox_vectors import Vector
+
 from tools.tracks import generate_track
 
 
