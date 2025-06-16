@@ -27,7 +27,6 @@ def plot_simulation_data(
     data: SimulationData,
     animate: bool = False,
     animation_speed: float = 1.0,
-    show_projected_path: bool = True,
     show_debug_info: bool = False,
     frame_skip: int | None = None,
 ) -> None:
@@ -42,7 +41,6 @@ def plot_simulation_data(
         data: Pre-computed simulation data
         animate: If True, create animated plot instead of static
         animation_speed: Playback speed multiplier (1.0 = real-time)
-        show_projected_path: Whether to show projected path in animation
         show_debug_info: Whether to show debug info during animation
         frame_skip: Skip frames for faster animation (auto-calculated if None)
     """
@@ -54,7 +52,6 @@ def plot_simulation_data(
         _plot_animated_data(
             data,
             animation_speed,
-            show_projected_path,
             show_debug_info,
             frame_skip,
         )
@@ -67,7 +64,6 @@ def plot_simulation_results(
     track: Track | None = None,
     animate: bool = False,
     animation_speed: float = 1.0,
-    show_projected_path: bool = True,
     show_debug_info: bool = False,
     frame_skip: int | None = None,
 ) -> None:
@@ -87,7 +83,6 @@ def plot_simulation_results(
         track: Optional track to visualize waypoints in black
         animate: If True, create animated plot instead of static
         animation_speed: Playback speed multiplier (1.0 = real-time)
-        show_projected_path: Whether to show projected path in animation
         show_debug_info: Whether to show debug info during animation
         frame_skip: Skip frames for faster animation (auto-calculated if None)
     """
@@ -116,7 +111,6 @@ def plot_simulation_results(
         data=data,
         animate=animate,
         animation_speed=animation_speed,
-        show_projected_path=show_projected_path,
         show_debug_info=show_debug_info,
         frame_skip=frame_skip,
     )
@@ -159,7 +153,6 @@ def _plot_static_data(data: SimulationData) -> None:
 def _plot_animated_data(
     data: SimulationData,
     animation_speed: float = 1.0,
-    show_projected_path: bool = True,
     show_debug_info: bool = False,
     frame_skip: int | None = None,
 ) -> None:
@@ -241,7 +234,7 @@ def _plot_animated_data(
     # Projected path
     projected_path_line = None
     has_projected_paths = any(state.projected_path is not None for state in data.states)
-    if show_projected_path and has_projected_paths:
+    if has_projected_paths:
         (projected_path_line,) = ax_traj.plot(
             [], [], "c:", linewidth=2, alpha=0.8, label="Projected Path"
         )
@@ -339,11 +332,7 @@ def _plot_animated_data(
                 lookahead_line.set_data([], [])
 
         # Update projected path
-        if (
-            show_projected_path
-            and projected_path_line is not None
-            and current_state.projected_path is not None
-        ):
+        if projected_path_line is not None and current_state.projected_path is not None:
             projected_path = current_state.projected_path
             proj_x = [p[0] for p in projected_path]
             proj_y = [p[1] for p in projected_path]

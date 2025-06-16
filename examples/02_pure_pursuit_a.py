@@ -132,10 +132,9 @@ def main() -> None:
     ]
     present_results(robot_states, t_end - t_start)
 
-    # Generate animation for debugging with unified interface
-    print("\nStarting debug animation...")
+    # Generate animation for viewing results
+    print("\nStarting animation...")
     try:
-        # Create simulation data with debug data already populated during simulation (feat_008)
         simulation_data = SimulationData(states=states, track=track)
 
         # Plot using unified interface - same function call, just different animate parameter
@@ -143,7 +142,6 @@ def main() -> None:
             data=simulation_data,
             animate=True,
             animation_speed=1.0,
-            show_projected_path=True,
             show_debug_info=True,
         )
         print("Animation completed successfully!")
