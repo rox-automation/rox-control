@@ -10,6 +10,7 @@ Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 
 import math
 import time
+from dataclasses import asdict
 
 from rox_control.controllers import PurePursuitA
 from tools.bicicle_model import BicycleModel, RobotState
@@ -38,18 +39,7 @@ def run_pure_pursuit_simulation(
 
     # Create initial SimulationState with no debug data
     initial_state = model.state
-    states = [
-        SimulationState(
-            x=initial_state.x,
-            y=initial_state.y,
-            theta=initial_state.theta,
-            v=initial_state.v,
-            steering_angle=initial_state.steering_angle,
-            time=initial_state.time,
-            front_x=initial_state.front_x,
-            front_y=initial_state.front_y,
-        )
-    ]
+    states = [SimulationState(**asdict(initial_state))]
 
     for step in range(max_steps):
         # Get control command
@@ -75,14 +65,7 @@ def run_pure_pursuit_simulation(
 
         # Create SimulationState with debug data
         simulation_state = SimulationState(
-            x=new_state.x,
-            y=new_state.y,
-            theta=new_state.theta,
-            v=new_state.v,
-            steering_angle=new_state.steering_angle,
-            time=new_state.time,
-            front_x=new_state.front_x,
-            front_y=new_state.front_y,
+            **asdict(new_state),
             controller_output=control_output,
             projected_path=projected_path,
         )
@@ -139,14 +122,11 @@ def main() -> None:
     # Convert SimulationState list to RobotState list for present_results (legacy compatibility)
     robot_states = [
         RobotState(
-            x=state.x,
-            y=state.y,
-            theta=state.theta,
-            v=state.v,
-            steering_angle=state.steering_angle,
-            time=state.time,
-            front_x=state.front_x,
-            front_y=state.front_y,
+            **{
+                k: v
+                for k, v in asdict(state).items()
+                if k in RobotState.__dataclass_fields__
+            }
         )
         for state in states
     ]
