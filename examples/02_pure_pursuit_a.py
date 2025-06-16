@@ -12,8 +12,8 @@ import math
 import time
 
 from rox_control.controllers import PurePursuitA
-from tools.plot import plot_simulation_results
 from tools.bicicle_model import BicycleModel, RobotState
+from tools.plot import plot_simulation_results
 from tools.simulation import present_results
 from tools.tracks import generate_track
 
@@ -104,15 +104,25 @@ def main() -> None:
     # Generate animation for debugging
     print("\nStarting debug animation...")
     try:
+        # Create fresh track and controller for animation (to avoid state contamination)
+        animation_track = generate_track("square", size=20.0)
+        animation_controller = PurePursuitA(
+            look_ahead_distance=2.0,
+            velocity_vector_length=1.0,
+            proportional_gain=1.0,
+            target_speed=5.0,
+        )
+        animation_controller.set_track(animation_track)
+        
         plot_simulation_results(
             states=states,
             model=model,
-            track=track,
+            track=animation_track,
             animate=True,
-            controller=controller,
+            controller=animation_controller,
             animation_speed=2.0,
             show_projected_path=True,
-            show_debug_info=True
+            show_debug_info=True,
         )
         print("Animation completed successfully!")
 

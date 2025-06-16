@@ -82,6 +82,7 @@ def plot_simulation_results(
     animation_speed: float = 1.0,
     show_projected_path: bool = True,
     show_debug_info: bool = False,
+    frame_skip: int | None = None,
 ) -> None:
     """
     Plot simulation results showing trajectory and time series data.
@@ -99,6 +100,7 @@ def plot_simulation_results(
         animation_speed: Playback speed multiplier (1.0 = real-time)
         show_projected_path: Whether to show projected path in animation
         show_debug_info: Whether to show debug info during animation
+        frame_skip: Skip frames for faster animation (auto-calculated if None)
     """
     if not states:
         print("Warning: No states provided for plotting")
@@ -113,6 +115,7 @@ def plot_simulation_results(
             animation_speed,
             show_projected_path,
             show_debug_info,
+            frame_skip,
         )
     else:
         _plot_static_results(states, model, track)
@@ -148,11 +151,23 @@ def _plot_animated_results(
     animation_speed: float = 1.0,
     show_projected_path: bool = True,
     show_debug_info: bool = False,
+    frame_skip: int | None = None,
 ) -> None:
     """Plot animated simulation results."""
     if not states:
         print("No states to animate")
         return
+
+    # Auto-calculate frame skip for reasonable animation speed
+    if frame_skip is None:
+        # Target ~50-100 frames for smooth animation regardless of data density
+        target_frames = 75
+        frame_skip = max(1, len(states) // target_frames)
+
+    # Create subsampled states for animation
+    animation_states = states[::frame_skip]
+    if states[-1] not in animation_states:  # Ensure we include the final state
+        animation_states.append(states[-1])
 
     # Create figure with same 2-column layout as static
     fig, (ax_traj, ax_time_container) = plt.subplots(1, 2, figsize=(15, 6))
@@ -204,16 +219,16 @@ def _plot_animated_results(
     target_dot = None
     lookahead_line = None
     if controller is not None:
-        (target_dot,) = ax_traj.plot([], [], "go", markersize=8, label="Target Point")
+        (target_dot,) = ax_traj.plot([], [], "mo", markersize=8, label="Target Point")
         (lookahead_line,) = ax_traj.plot(
-            [], [], "g--", linewidth=2, alpha=0.7, label="Lookahead"
+            [], [], "m--", linewidth=2, alpha=0.7, label="Lookahead"
         )
 
     # Projected path
     projected_path_line = None
     if show_projected_path:
         (projected_path_line,) = ax_traj.plot(
-            [], [], "m:", linewidth=2, alpha=0.8, label="Projected Path"
+            [], [], "c:", linewidth=2, alpha=0.8, label="Projected Path"
         )
 
     # Heading arrow
@@ -259,18 +274,21 @@ def _plot_animated_results(
 
     def update(frame_idx: int) -> tuple:
         """Update function for animation."""
-        if frame_idx >= len(states):
+        if frame_idx >= len(animation_states):
             return ()
 
-        current_state = states[frame_idx]
+        current_state = animation_states[frame_idx]
 
-        # Update trajectory traces (accumulate path)
-        rear_x = [s.x for s in states[: frame_idx + 1]]
-        rear_y = [s.y for s in states[: frame_idx + 1]]
+        # Find corresponding index in original states for trajectory building
+        original_idx = min(frame_idx * frame_skip, len(states) - 1)
+
+        # Update trajectory traces (accumulate path up to current position)
+        rear_x = [s.x for s in states[: original_idx + 1]]
+        rear_y = [s.y for s in states[: original_idx + 1]]
 
         # Calculate front wheel positions
         front_positions = []
-        for state in states[: frame_idx + 1]:
+        for state in states[: original_idx + 1]:
             model.state = state
             front_positions.append(model.get_front_wheel_pos())
         front_x = [pos[0] for pos in front_positions]
@@ -292,20 +310,30 @@ def _plot_animated_results(
         heading_arrow.set_position((arrow_end_x, arrow_end_y))
         heading_arrow.xy = (current_state.x, current_state.y)
 
-        # Update controller debug elements (if controller available)
+        # Get controller output once for all visualizations
+        control_output = None
+        if controller is not None:
+            control_output = controller.control(current_state)
+
+        # Update controller debug elements (if controller available and track not complete)
         if (
-            controller is not None
+            control_output is not None
             and target_dot is not None
             and lookahead_line is not None
         ):
-            control_output = controller.control(current_state)
-            target_dot.set_data(
-                [control_output.target_point.x], [control_output.target_point.y]
-            )
-            lookahead_line.set_data(
-                [current_state.x, control_output.target_point.x],
-                [current_state.y, control_output.target_point.y],
-            )
+            # Only show target point and lookahead if track is still active
+            if not control_output.track_complete:
+                target_dot.set_data(
+                    [control_output.target_point.x], [control_output.target_point.y]
+                )
+                lookahead_line.set_data(
+                    [current_state.x, control_output.target_point.x],
+                    [current_state.y, control_output.target_point.y],
+                )
+            else:
+                # Hide target point and lookahead when track is complete
+                target_dot.set_data([], [])
+                lookahead_line.set_data([], [])
 
         # Update projected path
         if show_projected_path and projected_path_line is not None:
@@ -313,11 +341,11 @@ def _plot_animated_results(
             projected_path_line.set_data(proj_x, proj_y)
 
         # Update time series data
-        times = [s.time for s in states[: frame_idx + 1]]
+        times = [s.time for s in states[: original_idx + 1]]
         steering_angles = [
-            math.degrees(s.steering_angle) for s in states[: frame_idx + 1]
+            math.degrees(s.steering_angle) for s in states[: original_idx + 1]
         ]
-        velocities = [s.v for s in states[: frame_idx + 1]]
+        velocities = [s.v for s in states[: original_idx + 1]]
 
         if times:
             steering_line.set_data(times, steering_angles)
@@ -334,10 +362,12 @@ def _plot_animated_results(
         debug_str += f"Robot: ({current_state.x:6.2f}, {current_state.y:6.2f})  θ: {math.degrees(current_state.theta):6.1f}°\n"
         debug_str += f"Speed: {current_state.v:5.2f} m/s  Steering: {math.degrees(current_state.steering_angle):6.1f}°"
 
-        if controller is not None:
-            control_output = controller.control(current_state)
-            debug_str += f"\nTarget: ({control_output.target_point.x:6.2f}, {control_output.target_point.y:6.2f})\n"
-            debug_str += f"Curvature: {control_output.curvature:7.4f}  Complete: {control_output.track_complete}"
+        if control_output is not None:
+            if not control_output.track_complete:
+                debug_str += f"\nTarget: ({control_output.target_point.x:6.2f}, {control_output.target_point.y:6.2f})\n"
+                debug_str += f"Curvature: {control_output.curvature:7.4f}  Active: True"
+            else:
+                debug_str += "\nTrack Complete: True"
 
         info_text.set_text(debug_str)
 
@@ -352,7 +382,9 @@ def _plot_animated_results(
     # Animation setup
     interval = max(10, int(10 / animation_speed))
 
-    print(f"Starting animation with {len(states)} frames")
+    print(
+        f"Starting animation with {len(animation_states)} frames (skipping every {frame_skip} from {len(states)} total)"
+    )
     print(f"Animation speed: {animation_speed}x, interval: {interval}ms")
 
     # Create and run animation
@@ -362,7 +394,12 @@ def _plot_animated_results(
     plt.tight_layout()
 
     anim = animation.FuncAnimation(
-        fig, update, frames=len(states), interval=interval, blit=False, repeat=False
+        fig,
+        update,
+        frames=len(animation_states),
+        interval=interval,
+        blit=False,
+        repeat=False,
     )
 
     plt.show()
