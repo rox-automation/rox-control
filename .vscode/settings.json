@@ -22,5 +22,10 @@
       "pybang": "#!/usr/bin/env python3"
     }
   },
-  "remote.autoForwardPorts": false
+  "remote.autoForwardPorts": false,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }
