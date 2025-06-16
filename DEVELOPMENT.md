@@ -34,49 +34,7 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
 
 * [feat_007] ✅ **COMPLETED** - Animation debugging tool unified in [`src/tools/plot.py`](src/tools/plot.py) - Real-time controller visualization with debug overlays, projected paths, and configurable animation speed
 
-* [feat_008] 🔄 **REFACTORING** - **Decouple visualization from simulation objects**. Current implementation has design issues that need addressing:
-
-  **Current Issues:**
-  - `SimulationData` class is in `plot.py` instead of `tools/simulation.py`
-  - `create_simulation_data()` calculates controller outputs after simulation, violating decoupling
-  - Animation interface is overcomplicated with projected path complexity
-  - Examples have inconsistent plotting interfaces (should only differ by `animate=True`)
-
-  **New Refactoring Plan:**
-  - **Step 1**: Move `SimulationData` and related functions to `tools/simulation.py`
-  - **Step 2**: Create `SimulationState` extending `RobotState` with optional debug data:
-    ```python
-    @dataclass(frozen=True)
-    class SimulationState:
-        # All RobotState fields
-        x: float = 0.0
-        y: float = 0.0
-        theta: float = 0.0
-        v: float = 0.0
-        steering_angle: float = 0.0
-        time: float = 0.0
-        front_x: float = 0.0
-        front_y: float = 0.0
-
-        # Optional debug data (user responsibility during simulation)
-        controller_output: ControlOutput | None = None
-        projected_path: list[tuple[float, float]] | None = None
-    ```
-  - **Step 3**: Simplify `SimulationData` to just contain pre-computed states:
-    ```python
-    @dataclass(frozen=True)
-    class SimulationData:
-        states: list[SimulationState]
-        track: Track | None = None
-    ```
-  - **Step 4**: Make both examples use identical interface: `plot_simulation_data(data, animate=False/True)`
-  - **Step 5**: User populates debug data during simulation if needed (no post-calculation)
-
-  **Benefits:**
-  - True decoupling - all calculations during simulation phase
-  - Consistent simple interface between static and animated plotting
-  - User controls what debug data to include
-  - No overcomplicated projected path handling in animation
+* [feat_008] ✅ **COMPLETED** - Visualization architecture refactored with unified interface and true simulation/visualization decoupling in [`src/tools/simulation.py`](src/tools/simulation.py)
 
 ## Tooling
 
