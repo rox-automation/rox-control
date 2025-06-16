@@ -25,6 +25,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Full integration with existing Track class from feat_003
   - Comprehensive test suite with 18 test cases covering all track types and edge cases
   - 100% test coverage (44/44 statements)
+- **Pure Pursuit A Controller** (feat_005)
+  - Velocity-projected pure pursuit algorithm with proportional control
+  - `PurePursuitA` class with configurable parameters (lookahead, gain, speed)
+  - `ControlOutput` dataclass with structured control commands and debug info
+  - `set_track()` and `control()` methods for clean stateful interface
+  - Projects robot future position using velocity vector before path projection
+  - Uses `point_on_line` for accurate segment projection and lookahead targeting
+  - Handles track completion and edge cases (empty tracks, beyond end)
+  - Full integration with existing `Track` and `RobotState` types
+  - Comprehensive test suite with 16 test methods covering unit and integration scenarios
+  - 96% test coverage (47/49 statements)
+
+### Changed
+- **Controller organization**: Moved from single file to modular directory structure
+  - Controllers now organized in `src/rox_control/controllers/` directory
+  - Each controller implemented in separate file (e.g., `pure_pursuit_a.py`)
+  - Exported with descriptive names via `__init__.py` (e.g., `PurePursuitA`)
+  - Shared `ControlOutput` dataclass for consistent interface across controllers
 
 ## [0.1.0] - 2025-06-15
 

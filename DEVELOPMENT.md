@@ -28,35 +28,35 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
 
 * [feat_004] ✅ **COMPLETED** - Track generator functions in [`src/tools/tracks.py`](src/tools/tracks.py) with tests in [`tests/test_track_generators.py`](tests/test_track_generators.py)
 
-* [feat_005] - Pure pursuit controller in `src/rox_control/controllers.py` (new module)
-    - **Class-based design:** `PurePursuitController` with clean stateful interface
-    - **Constructor parameters:**
-      - `look_ahead_distance: float = 0.2` - lookahead distance for target calculation
-      - `velocity_vector_length: float = 0.1` - robot velocity projection length
-      - `proportional_gain: float = 1.0` - steering control gain
-      - `target_speed: float = 0.1` - desired robot velocity
-    - **Core interface:**
-      - `set_track(track: Track)` - assign track for controller to follow
-      - `control(robot_state: RobotState) -> ControlOutput` - returns structured control data
-    - **ControlOutput dataclass:**
-      - `curvature: float` - steering command (essential)
-      - `velocity: float` - speed command (essential)
-      - `target_point: Vector` - target point for visualization
-      - `future_position: Vector` - projected robot position
-      - `angle_error: float` - pure pursuit angle error for debugging
-      - `track_complete: bool` - whether track following is finished
-    - **Features:**
-      - Integrates with `Track` objects from feat_003 and `RobotState` from bicycle model
-      - Extensible output format for visualization and debugging
-      - Handles track completion and safety edge cases
-    - Port core algorithm from `target_position()` and `proportional_control()` functions
-    - Add comprehensive unit tests and integration tests with Track class
+* [feat_005] ✅ **COMPLETED** - Pure pursuit A controller in [`src/rox_control/controllers/pure_pursuit_a.py`](src/rox_control/controllers/pure_pursuit_a.py) with tests in [`tests/test_controllers.py`](tests/test_controllers.py)
+
+* [feat_006] 🔄 **WIP** - Pure Pursuit A controller example in `examples/02_pure_pursuit_a.py`:
+  - ✅ Basic implementation with timeout safety and track visualization
+  - ✅ Clean control interface using `set_control_command(curvature, velocity)`
+  - ✅ 20m x 20m square track with scaled parameters
+  - ❌ **ISSUE**: Controller behavior shows poor path following in plots - needs debugging
+  - **Status**: Implementation complete but controller tuning/debugging required
+
+* [feat_007] - Animation debugging tool in `src/tools/animation.py`:
+  - `animate_simulation(states, controller_outputs, track)` - step-by-step replay
+  - Show robot position, heading, and front wheel position at each timestep
+  - Visualize track waypoints and current target point from controller
+  - Display controller debug info: lookahead point, projected position, angle error
+  - Configurable playback speed for detailed analysis
+  - Enable/disable different visualization layers (track, target, lookahead, etc.)
+  - **Purpose**: Debug controller behavior and tune parameters visually
+
 
 **Architectural Considerations:**
-- **Module Organization:** Consider splitting `tracks.py` if it grows large - separate `Track`/generators from controller logic
-- **Testing Strategy:** Each feature in core library needs comprehensive unit tests with edge cases (empty tracks, single waypoint, malformed data). Code contained in `tools` may have less strict testing, we should not care too much about edge cases here.
-- **Type Safety:** Full mypy compliance with no `# type: ignore` comments required
-- **Documentation:** Add docstring for each class/function where function name may need some clarification. A single line docstring is enough, typehints should provide enough context about the interface.
+- **Module Organization:** ✅ Controllers organized in `src/rox_control/controllers/` directory structure
+  - Each controller in separate file with descriptive name (e.g., `pure_pursuit_a.py`)
+  - Exported with clear names via `__init__.py` (e.g., `PurePursuitA`)
+  - Shared `ControlOutput` dataclass for consistent interface across controllers
+- **Testing Strategy:** ✅ Comprehensive unit tests with edge cases implemented
+  - Core library features have full test coverage (empty tracks, single waypoint, malformed data)
+  - Code in `tools` may have less strict testing requirements
+- **Type Safety:** ✅ Full mypy compliance achieved with proper type annotations
+- **Documentation:** ✅ One-line docstrings added for all classes and non-trivial functions
 
 
 
@@ -64,11 +64,7 @@ For reference, see `temp/external/python-robotics/examples/pure_pursuit/pure_pur
 
 **Animation Tools**
 
-* Create `src/tools/animation.py` with live animation functions
-    - `animate_simulation(states: list[RobotState])` - replay with matplotlib animation
-    - Progressive state replay with configurable playbook speed
-    - Show projected path curve for front wheel during replay
-    - Reference: `temp/external/python-robotics/temp/mpl_visualizer.py:369-443`
+
 
 
 * Create `examples/02_animate.py`
