@@ -398,12 +398,13 @@ def _plot_animated_data(
         frames=len(animation_states),
         interval=interval,
         blit=False,
-        repeat=False,
+        repeat=True,
     )
 
+    print("Animation looping (press Ctrl+C to stop or close the window)")
     plt.show()
     _ = anim  # Prevent garbage collection
-    print("\nAnimation complete!")
+    print("\nAnimation stopped!")
 
 
 def _plot_trajectory(

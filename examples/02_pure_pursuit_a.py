@@ -108,7 +108,7 @@ def main() -> None:
         look_ahead_distance=5.0,  # 2m lookahead (scaled from 0.2m)
         velocity_vector_length=1.0,  # 1m velocity vector (scaled from 0.1m)
         proportional_gain=1.0,  # Same gain as reference
-        target_speed=5.0,  # 5 m/s target speed (scaled from 0.1 m/s)
+        target_speed=2.0,
     )
 
     # Set track for controller

@@ -12,7 +12,6 @@ def test_version() -> None:
 
 
 def test_simulation() -> None:
-
     from tools.simulation import SimulationData, SimulationState
 
     _ = SimulationState()
