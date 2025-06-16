@@ -92,7 +92,6 @@ def main() -> None:
     print("Generating plots...")
     try:
         import matplotlib.pyplot as plt
-
         from tools.plot import plot_simulation_results
 
         plot_simulation_results(states, model)

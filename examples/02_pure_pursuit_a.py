@@ -113,7 +113,7 @@ def main() -> None:
             target_speed=5.0,
         )
         animation_controller.set_track(animation_track)
-        
+
         plot_simulation_results(
             states=states,
             model=model,

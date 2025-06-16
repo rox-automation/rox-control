@@ -48,7 +48,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - **BicycleModel** class with realistic bicycle kinematics simulation
-  - Rate-limited steering and acceleration 
+  - Rate-limited steering and acceleration
   - Configurable wheelbase, max steering angle, and acceleration limits
   - State tracking with time progression
 - **Geometric methods** for bicycle model

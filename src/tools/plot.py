@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING, Any
 
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
-
 from rox_control.tracks import Track
 
 from .bicicle_model import BicycleModel, RobotState

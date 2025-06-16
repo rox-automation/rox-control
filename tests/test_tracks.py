@@ -2,9 +2,8 @@
 """Tests for Track class functionality."""
 
 import pytest
-from rox_vectors import Vector
-
 from rox_control.tracks import Track
+from rox_vectors import Vector
 
 
 class TestTrackInitialization:

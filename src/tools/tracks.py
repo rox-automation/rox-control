@@ -4,9 +4,8 @@
 import math
 from typing import Any
 
-from rox_vectors import Vector
-
 from rox_control.tracks import Track
+from rox_vectors import Vector
 
 
 def generate_track(track_type: str, **kwargs: Any) -> Track:

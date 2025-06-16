@@ -67,6 +67,3 @@ RUN echo ${VERSION} >> /build_date.txt && \
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
-
-
-

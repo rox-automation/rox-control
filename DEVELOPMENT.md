@@ -124,4 +124,3 @@ Open in VS Code and select "Reopen in Container" for a pre-configured developmen
 * `src/tools/` - Supporting simulation and visualization code (not packaged)
 * `tasks.py` - Automation tasks via invoke
 * `pyproject.toml` - Modern Python packaging configuration
-
