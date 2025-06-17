@@ -116,8 +116,8 @@ class TestTrackIntegration:
         track = generate_track("square")
 
         # Should be able to use Track methods
-        assert hasattr(track, "find_next_idx")
-        assert hasattr(track, "target_reached")
+        assert hasattr(track, "find_closest_segment")
+        assert hasattr(track, "get_lookahead_point")
 
         # Should have at least 2 waypoints (Track requirement)
         assert len(track) >= 2
