@@ -18,7 +18,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.widgets import Button
 
-from rox_control.tracks import Track
+from rox_control.track import Track
 
 from .bicicle_model import RobotState
 from .simulation import SimulationData, SimulationState

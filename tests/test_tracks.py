@@ -4,7 +4,7 @@
 import pytest
 from rox_vectors import Vector
 
-from rox_control.tracks import Track
+from rox_control.track import Track
 
 
 class TestTrackInitialization:
@@ -116,43 +116,6 @@ class TestTrackFindClosestSegment:
         # Should find one of the adjacent segments
         assert segment_idx in [0, 1]
         assert projected_point == Vector(2, 0)
-
-
-class TestTrackGetLookaheadPoint:
-    """Test get_lookahead_point method functionality."""
-
-    def test_lookahead_within_segment(self):
-        """Test lookahead point within current segment."""
-        waypoints = [Vector(0, 0), Vector(4, 0)]
-        track = Track(waypoints)
-
-        # Start at beginning of segment, lookahead of 2 units
-        target_point, track_complete = track.get_lookahead_point(0, 0.0, 2.0)
-
-        assert track_complete is False
-        assert target_point == Vector(2, 0)
-
-    def test_lookahead_beyond_segment(self):
-        """Test lookahead point extending beyond current segment."""
-        waypoints = [Vector(0, 0), Vector(2, 0), Vector(4, 0)]
-        track = Track(waypoints)
-
-        # Start near end of first segment, lookahead extends to second segment
-        target_point, track_complete = track.get_lookahead_point(0, 1.5, 1.0)
-
-        assert track_complete is False
-        assert target_point == Vector(2.5, 0)
-
-    def test_lookahead_beyond_track_end(self):
-        """Test lookahead extending beyond track end."""
-        waypoints = [Vector(0, 0), Vector(2, 0)]
-        track = Track(waypoints)
-
-        # Lookahead extends beyond final waypoint
-        target_point, track_complete = track.get_lookahead_point(0, 1.0, 5.0)
-
-        assert track_complete is True
-        assert target_point == Vector(2, 0)
 
 
 class TestTrackUserListBehavior:
