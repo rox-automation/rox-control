@@ -20,6 +20,8 @@ from tools.tracks import rectangular_track
 
 WHEELBASE = 5.0  # distance between front and rear wheels in meters
 
+ANIMATE = True  # Set to False to disable animation
+
 
 def run_pure_pursuit_simulation(
     controller: PurePursuitA, model: BicycleModel, dt: float = 0.01
@@ -73,13 +75,6 @@ def run_pure_pursuit_simulation(
         )
         states.append(simulation_state)
 
-        # Progress reporting (every 20 steps like reference)
-        if step % 20 == 0 or step < 10:
-            print(
-                f"Step {step:3d}: pos=({new_state.x:5.2f}, {new_state.y:5.2f}), "
-                f"heading={math.degrees(new_state.theta):6.1f}°, "
-                f"target=({control_output.target_point.x:5.2f}, {control_output.target_point.y:5.2f})"
-            )
     else:
         # Timeout occurred
         print(f"Simulation timeout after {timeout:.1f}s ({len(states)} steps)")
@@ -142,9 +137,8 @@ def main() -> None:
         # Plot using unified interface - same function call, just different animate parameter
         plot_simulation_data(
             data=simulation_data,
-            animate=True,
+            animate=ANIMATE,
             animation_speed=1.0,
-            show_debug_info=True,
         )
         print("Animation completed successfully!")
 
