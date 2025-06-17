@@ -2,7 +2,7 @@
 """Pure pursuit A path tracking controller implementation."""
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from rox_vectors import Vector
 
@@ -25,11 +25,7 @@ class ControlOutput:
 
 
 class Controller:
-    """Pure pursuit A path tracking controller.
-
-    Implements a velocity-projected pure pursuit algorithm for smooth path following
-    with configurable lookahead parameters and proportional control.
-    """
+    """Pure pursuit A path tracking controller with velocity-projected lookahead."""
 
     def __init__(
         self,
@@ -38,39 +34,21 @@ class Controller:
         proportional_gain: float = 1.0,
         target_speed: float = 0.1,
     ) -> None:
-        """Initialize pure pursuit controller.
-
-        Args:
-            look_ahead_distance: Lookahead distance for target calculation
-            velocity_vector_length: Robot velocity projection length
-            proportional_gain: Steering control gain
-            target_speed: Desired robot velocity
-        """
+        """Initialize pure pursuit controller with configurable parameters."""
         self.look_ahead_distance = look_ahead_distance
         self.velocity_vector_length = velocity_vector_length
         self.proportional_gain = proportional_gain
         self.target_speed = target_speed
-        self._track: Optional[Track] = None
+        self._track: Track | None = None
 
     def set_track(self, track: Track) -> None:
-        """Assign track for controller to follow.
-
-        Args:
-            track: Track object containing waypoints to follow
-        """
+        """Assign track for controller to follow."""
         self._track = track
 
     def control(self, robot_state: "RobotState") -> ControlOutput:
-        """Calculate control output for robot state.
+        """Calculate control output for current robot state.
 
-        Args:
-            robot_state: Current robot state (RobotState object)
-
-        Returns:
-            ControlOutput with control commands and debug information
-
-        Raises:
-            ValueError: If no track has been set
+        Returns: ControlOutput with curvature and velocity commands.
         """
         if self._track is None:
             raise ValueError("No track set. Call set_track() first.")
@@ -118,16 +96,9 @@ class Controller:
         )
 
     def _proportional_control(self, target: float, current: float) -> float:
-        """Proportional controller for angle error.
+        """Proportional controller for angle error correction.
 
-        Ported from reference implementation's proportional_control function.
-
-        Args:
-            target: Target angle (typically 0.0 for pure pursuit)
-            current: Current angle error
-
-        Returns:
-            Control output (curvature command)
+        Returns: Curvature command.
         """
         return self.proportional_gain * (target - current)
 
@@ -136,13 +107,7 @@ class Controller:
     ) -> tuple[Vector, bool]:
         """Get target point at lookahead distance ahead on track.
 
-        Args:
-            segment_idx: Starting segment index
-            distance_along_segment: Distance along segment in meters
-            lookahead_distance: Lookahead distance in meters
-
-        Returns:
-            Tuple of (target_point, track_complete)
+        Returns: Tuple of (target_point, track_complete).
         """
         if self._track is None:
             raise ValueError("No track set")
