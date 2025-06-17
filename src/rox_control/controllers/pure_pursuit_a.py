@@ -85,7 +85,7 @@ class Controller:
         )
 
         # Get target point using lookahead distance
-        target_point, track_complete = self._track.get_lookahead_point(
+        target_point, track_complete = self._get_lookahead_point(
             segment_idx, distance_along, self.look_ahead_distance
         )
 
@@ -130,3 +130,57 @@ class Controller:
             Control output (curvature command)
         """
         return self.proportional_gain * (target - current)
+
+    def _get_lookahead_point(
+        self, segment_idx: int, distance_along_segment: float, lookahead_distance: float
+    ) -> tuple[Vector, bool]:
+        """Get target point at lookahead distance ahead on track.
+
+        Args:
+            segment_idx: Starting segment index
+            distance_along_segment: Distance along segment in meters
+            lookahead_distance: Lookahead distance in meters
+
+        Returns:
+            Tuple of (target_point, track_complete)
+        """
+        if self._track is None:
+            raise ValueError("No track set")
+
+        if segment_idx >= len(self._track) - 1:
+            # Already at or past the last segment
+            return self._track[-1], True
+
+        remaining_lookahead = lookahead_distance
+        current_segment_idx = segment_idx
+        current_distance_along = distance_along_segment
+
+        # Start from current position on current segment
+        while current_segment_idx < len(self._track) - 1:
+            waypoint_a = self._track[current_segment_idx]
+            waypoint_b = self._track[current_segment_idx + 1]
+            segment_vector = waypoint_b - waypoint_a
+            segment_length = abs(segment_vector)
+
+            # Remaining distance in current segment
+            remaining_in_segment = segment_length - current_distance_along
+
+            if remaining_lookahead <= remaining_in_segment:
+                # Target point is within current segment
+                if segment_length > 0:
+                    segment_direction = segment_vector / segment_length
+                    target_distance_along = current_distance_along + remaining_lookahead
+                    target_point = (
+                        waypoint_a + segment_direction * target_distance_along
+                    )
+                else:
+                    target_point = waypoint_a
+                return target_point, False
+
+            # Move to next segment
+            remaining_lookahead -= remaining_in_segment
+            current_segment_idx += 1
+            current_distance_along = 0.0
+
+        # Lookahead extends beyond track end
+        return self._track[-1], True

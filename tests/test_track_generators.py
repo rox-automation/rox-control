@@ -117,7 +117,6 @@ class TestTrackIntegration:
 
         # Should be able to use Track methods
         assert hasattr(track, "find_closest_segment")
-        assert hasattr(track, "get_lookahead_point")
 
         # Should have at least 2 waypoints (Track requirement)
         assert len(track) >= 2
