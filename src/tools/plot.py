@@ -231,7 +231,7 @@ def _plot_animated_data(
     (front_trace,) = ax_traj.plot(
         [], [], "r--", linewidth=2, label="Front Wheel", alpha=0.8
     )
-    (robot_rear_dot,) = ax_traj.plot([], [], "bo", markersize=8, label="Robot Position")
+    (robot_rear_dot,) = ax_traj.plot([], [], "go", markersize=8, label="Robot Position")
     (robot_front_dot,) = ax_traj.plot([], [], "ro", markersize=6, label="Front Wheel")
 
     # Controller debug elements (if any state has controller output)
@@ -259,7 +259,7 @@ def _plot_animated_data(
         "",
         xy=(0, 0),
         xytext=(0, 0),
-        arrowprops={"arrowstyle": "->", "color": "blue", "lw": 2},
+        arrowprops={"arrowstyle": "->", "color": "green", "lw": 2},
     )
 
     ax_traj.legend(loc="best")
