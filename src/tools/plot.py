@@ -309,7 +309,7 @@ def _plot_animated_data(
 
     # Animation control state
     class AnimationState:
-        def __init__(self):
+        def __init__(self) -> None:
             self.is_paused = False
             self.current_frame = 0
             self.anim: animation.FuncAnimation | None = None
@@ -344,13 +344,13 @@ def _plot_animated_data(
     btn_stop = Button(ax_stop, "STOP")
 
     # Button callback functions
-    def step_back(_event):
+    def step_back(_event: Any) -> None:
         if anim_state.current_frame > 0:
             anim_state.current_frame -= 1
             update(anim_state.current_frame)
             fig.canvas.draw()
 
-    def toggle_play_pause(_event):
+    def toggle_play_pause(_event: Any) -> None:
         if anim_state.is_paused:
             # Currently paused, so play
             anim_state.is_paused = False
@@ -365,13 +365,13 @@ def _plot_animated_data(
             btn_play_pause.label.set_text(">")
         fig.canvas.draw()
 
-    def step_forward(_event):
+    def step_forward(_event: Any) -> None:
         if anim_state.current_frame < len(animation_states) - 1:
             anim_state.current_frame += 1
             update(anim_state.current_frame)
             fig.canvas.draw()
 
-    def stop_animation(_event):
+    def stop_animation(_event: Any) -> None:
         if anim_state.anim:
             anim_state.anim.pause()
         plt.close(fig)
