@@ -16,6 +16,7 @@ import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.widgets import Button
 
 from rox_control.tracks import Track
 
@@ -173,12 +174,12 @@ def _plot_animated_data(
     if states[-1] not in animation_states:  # Ensure we include the final state
         animation_states.append(states[-1])
 
-    # Create figure with same 2-column layout as static
-    fig, (ax_traj, ax_time_container) = plt.subplots(1, 2, figsize=(15, 6))
+    # Create figure with same 2-column layout as static, but taller for buttons
+    fig, (ax_traj, ax_time_container) = plt.subplots(1, 2, figsize=(15, 7))
 
-    # Remove the time container and create 2 stacked subplots
+    # Remove the time container and create 2 stacked subplots with space for buttons
     ax_time_container.remove()
-    gs = fig.add_gridspec(2, 2, width_ratios=[1, 1], height_ratios=[1, 1])
+    gs = fig.add_gridspec(3, 2, width_ratios=[1, 1], height_ratios=[1, 1, 0.15])
     ax_steering = fig.add_subplot(gs[0, 1])
     ax_velocity = fig.add_subplot(gs[1, 1])
 
@@ -306,10 +307,88 @@ def _plot_animated_data(
         bbox={"boxstyle": "round", "facecolor": "wheat", "alpha": 0.8},
     )
 
+    # Animation control state
+    class AnimationState:
+        def __init__(self):
+            self.is_paused = False
+            self.current_frame = 0
+            self.anim: animation.FuncAnimation | None = None
+
+    anim_state = AnimationState()
+
+    # Create control buttons
+    button_height = 0.04
+    button_width = 0.08
+    button_y = 0.02
+    button_spacing = 0.12
+    start_x = 0.3  # Center the buttons
+
+    # Button positions - now 4 buttons instead of 5
+    ax_step_back = fig.add_axes((start_x, button_y, button_width, button_height))
+    ax_play_pause = fig.add_axes(
+        (start_x + button_spacing, button_y, button_width, button_height)
+    )
+    ax_step_forward = fig.add_axes(
+        (start_x + 2 * button_spacing, button_y, button_width, button_height)
+    )
+    ax_stop = fig.add_axes(
+        (start_x + 3 * button_spacing, button_y, button_width, button_height)
+    )
+
+    # Create buttons
+    btn_step_back = Button(ax_step_back, "|<")
+    btn_play_pause = Button(
+        ax_play_pause, "||"
+    )  # Starts with || since animation is playing
+    btn_step_forward = Button(ax_step_forward, ">|")
+    btn_stop = Button(ax_stop, "STOP")
+
+    # Button callback functions
+    def step_back(_event):
+        if anim_state.current_frame > 0:
+            anim_state.current_frame -= 1
+            update(anim_state.current_frame)
+            fig.canvas.draw()
+
+    def toggle_play_pause(_event):
+        if anim_state.is_paused:
+            # Currently paused, so play
+            anim_state.is_paused = False
+            if anim_state.anim:
+                anim_state.anim.resume()
+            btn_play_pause.label.set_text("||")
+        else:
+            # Currently playing, so pause
+            anim_state.is_paused = True
+            if anim_state.anim:
+                anim_state.anim.pause()
+            btn_play_pause.label.set_text(">")
+        fig.canvas.draw()
+
+    def step_forward(_event):
+        if anim_state.current_frame < len(animation_states) - 1:
+            anim_state.current_frame += 1
+            update(anim_state.current_frame)
+            fig.canvas.draw()
+
+    def stop_animation(_event):
+        if anim_state.anim:
+            anim_state.anim.pause()
+        plt.close(fig)
+
+    # Connect button callbacks
+    btn_step_back.on_clicked(step_back)
+    btn_play_pause.on_clicked(toggle_play_pause)
+    btn_step_forward.on_clicked(step_forward)
+    btn_stop.on_clicked(stop_animation)
+
     def update(frame_idx: int) -> tuple:
         """Update function for animation."""
         if frame_idx >= len(animation_states):
             return ()
+
+        # Update current frame state for manual control
+        anim_state.current_frame = frame_idx
 
         current_state = animation_states[frame_idx]
 
@@ -423,7 +502,10 @@ def _plot_animated_data(
         repeat=True,
     )
 
-    print("Animation looping (press Ctrl+C to stop or close the window)")
+    # Store animation reference for button controls
+    anim_state.anim = anim
+
+    print("Animation looping (use buttons to control or close the window)")
     plt.show()
     _ = anim  # Prevent garbage collection
     print("\nAnimation stopped!")
