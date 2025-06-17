@@ -232,7 +232,6 @@ def _plot_animated_data(
         [], [], "r--", linewidth=2, label="Front Wheel", alpha=0.8
     )
     (robot_rear_dot,) = ax_traj.plot([], [], "go", markersize=8, label="Robot Position")
-    (robot_front_dot,) = ax_traj.plot([], [], "ro", markersize=6, label="Front Wheel")
 
     # Controller debug elements (if any state has controller output)
     target_dot = None
@@ -328,14 +327,10 @@ def _plot_animated_data(
 
         # Update robot positions
         robot_rear_dot.set_data([current_state.x], [current_state.y])
-        robot_front_dot.set_data([current_state.front_x], [current_state.front_y])
 
-        # Update heading arrow
-        arrow_length = 3.0
-        arrow_end_x = current_state.x + arrow_length * math.cos(current_state.theta)
-        arrow_end_y = current_state.y + arrow_length * math.sin(current_state.theta)
+        # Update heading arrow (extend to front wheel position)
         heading_arrow.set_position((current_state.x, current_state.y))
-        heading_arrow.xy = (arrow_end_x, arrow_end_y)
+        heading_arrow.xy = (current_state.front_x, current_state.front_y)
 
         # Update controller debug elements (if available)
         if (
