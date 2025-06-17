@@ -7,7 +7,7 @@ import pytest
 from rox_vectors import Vector
 
 from rox_control.controllers import ControlOutput, PurePursuitA
-from rox_control.tracks import Track
+from rox_control.track import Track
 from tools.bicicle_model import RobotState
 
 

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional
 
 from rox_vectors import Vector
 
-from rox_control.tracks import Track
+from rox_control.track import Track
 
 if TYPE_CHECKING:  # pragma: no cover
     from tools.bicicle_model import RobotState
