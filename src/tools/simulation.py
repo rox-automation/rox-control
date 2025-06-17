@@ -35,7 +35,7 @@ class SimulationData:
 def present_results(states: list["RobotState"], execution_time: float) -> None:
     """Present simulation results in a formatted way."""
 
-    def print_states_table(states: list["RobotState"], subsample: int = 50) -> None:
+    def print_states_table(states: list["RobotState"], nr_rows: int = 10) -> None:
         """Print states in a nicely formatted table."""
         print(
             f"{'Time':>6} {'X':>8} {'Y':>8} {'Theta':>8} {'Velocity':>8} {'Steering':>8}"
@@ -44,6 +44,9 @@ def present_results(states: list["RobotState"], execution_time: float) -> None:
             f"{'(s)':>6} {'(m)':>8} {'(m)':>8} {'(deg)':>8} {'(m/s)':>8} {'(deg)':>8}"
         )
         print("-" * 54)
+
+        # Calculate subsample automatically based on desired number of rows
+        subsample = max(1, len(states) // nr_rows)
 
         for i, state in enumerate(states):
             if i % subsample == 0:
