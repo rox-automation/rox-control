@@ -44,6 +44,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `SimulationState` extends `RobotState` with optional debug data (`controller_output`, `projected_path`)
   - Unified plotting interface: `plot_simulation_data(data, animate=False/True)` for both static and animated plots
   - True decoupling: debug data populated during simulation, not post-visualization calculation
+- **Animation enhancements**
+  - Left plot now uses full vertical space while maintaining aspect ratio
+  - Robot position marker and heading vector changed from blue to green
+  - Velocity and steering plots scaled to 110% of simulation data maximum values
+  - Track transparency set to 50% for better trajectory visibility
+  - Heading arrow now extends from robot position to front wheel position
+  - Removed separate front wheel position marker for cleaner visualization
+- **Interactive animation controls**
+  - Added VCR-style control buttons: `|<` (step back), `||/>`(play/pause toggle), `>|` (step forward), `STOP`
+  - Manual frame stepping with immediate visual feedback
+  - Play/pause toggle with dynamic button label updates
+  - Stop button closes animation window
+  - Buttons positioned at bottom of figure with consistent spacing
 - **Controller organization**: Moved from single file to modular directory structure
   - Controllers now organized in `src/rox_control/controllers/` directory
   - Each controller implemented in separate file (e.g., `pure_pursuit_a.py`)
