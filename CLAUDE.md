@@ -84,6 +84,25 @@ Note: After modifying Python files, always run `ruff check --fix` and `ruff form
 - Pre-commit hooks available for automated checks
 - Target line length and style defined in `pyproject.toml` ruff configuration
 
+### Docstring Style Guidelines
+
+- **Classes**: Single descriptive line explaining the class purpose
+- **Methods without return values**: Single descriptive line explaining what the method does
+- **Methods with return values**: Two lines:
+  - First line: Descriptive explanation of what the method does
+  - Second line: `Returns: <description of return value>`
+- **Type hints should be descriptive enough** - avoid verbose argument descriptions
+- **Use modern Python 3.10+ union syntax** (`Type | None` instead of `Optional[Type]`)
+
+Example:
+```python
+def calculate_distance(self, point_a: Vector, point_b: Vector) -> float:
+    """Calculate Euclidean distance between two points.
+
+    Returns: Distance in meters.
+    """
+```
+
 ## References
 
 The project builds upon concepts from PythonRobotics but focuses on production-ready implementations rather than educational examples. External reference code is available in `temp/external/` for comparison and learning.
