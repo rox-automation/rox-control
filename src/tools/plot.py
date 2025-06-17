@@ -264,16 +264,28 @@ def _plot_animated_data(
 
     ax_traj.legend(loc="best")
 
+    # Calculate steering limits based on simulation data
+    max_abs_steering = (
+        max(abs(math.degrees(state.steering_angle)) for state in states)
+        if states
+        else 50.0
+    )
+    steering_limit = max_abs_steering * 1.1  # 110% of max absolute steering
+
     # Setup time series plots
     ax_steering.set_xlim(0, 10)  # Rolling window
-    ax_steering.set_ylim(-50, 50)  # Degrees
+    ax_steering.set_ylim(-steering_limit, steering_limit)  # Symmetric limits
     ax_steering.grid(True, alpha=0.3)
     ax_steering.set_ylabel("Steering Angle (°)")
     ax_steering.set_title("Steering Dynamics")
     ax_steering.tick_params(labelbottom=False)
 
+    # Calculate velocity limits based on simulation data
+    max_velocity = max(state.v for state in states) if states else 20.0
+    velocity_limit = max_velocity * 1.1  # 110% of max velocity
+
     ax_velocity.set_xlim(0, 10)  # Rolling window
-    ax_velocity.set_ylim(0, 20)  # m/s
+    ax_velocity.set_ylim(0, velocity_limit)
     ax_velocity.grid(True, alpha=0.3)
     ax_velocity.set_xlabel("Time (s)")
     ax_velocity.set_ylabel("Velocity (m/s)")
@@ -518,12 +530,26 @@ def _plot_time_series(ax_container: Axes, data: dict[str, Any], fig: Figure) -> 
 
     # Upper plot: Steering angle vs time
     ax_steering.plot(times, data["steering_angles"], "g-", linewidth=2)
+
+    # Set steering limits to 110% of max absolute steering angle
+    if data["steering_angles"]:
+        max_abs_steering = max(abs(angle) for angle in data["steering_angles"])
+        steering_limit = max_abs_steering * 1.1
+        ax_steering.set_ylim(-steering_limit, steering_limit)
+
     ax_steering.grid(True, alpha=0.3)
     ax_steering.set_ylabel("Steering Angle (°)")
     ax_steering.set_title("Steering Dynamics")
 
     # Lower plot: Velocity vs time
     ax_velocity.plot(times, data["velocities"], "m-", linewidth=2)
+
+    # Set velocity limits to 110% of max velocity
+    if data["velocities"]:
+        max_velocity = max(data["velocities"])
+        velocity_limit = max_velocity * 1.1
+        ax_velocity.set_ylim(0, velocity_limit)
+
     ax_velocity.grid(True, alpha=0.3)
     ax_velocity.set_xlabel("Time (s)")
     ax_velocity.set_ylabel("Velocity (m/s)")
