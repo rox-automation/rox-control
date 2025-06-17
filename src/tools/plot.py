@@ -438,8 +438,8 @@ def _plot_trajectory(
         if track is not None:
             track_x = [waypoint.x for waypoint in track.data]
             track_y = [waypoint.y for waypoint in track.data]
-            ax.plot(track_x, track_y, "k-", linewidth=3, label="Track", alpha=0.7)
-            ax.plot(track_x, track_y, "ko", markersize=6, alpha=0.7)
+            ax.plot(track_x, track_y, "k-", linewidth=3, label="Track", alpha=0.5)
+            ax.plot(track_x, track_y, "ko", markersize=6, alpha=0.5)
 
         ax.set_aspect("equal")
         ax.grid(True, alpha=0.3)
@@ -456,8 +456,8 @@ def _plot_trajectory(
     if track is not None:
         track_x = [waypoint.x for waypoint in track.data]
         track_y = [waypoint.y for waypoint in track.data]
-        ax.plot(track_x, track_y, "k-", linewidth=3, label="Track", alpha=0.7)
-        ax.plot(track_x, track_y, "ko", markersize=6, alpha=0.7)
+        ax.plot(track_x, track_y, "k-", linewidth=3, label="Track", alpha=0.5)
+        ax.plot(track_x, track_y, "ko", markersize=6, alpha=0.5)
 
     # Plot trajectories
     ax.plot(rear_x, rear_y, "b-", linewidth=2, label="Rear Wheel", alpha=0.8)
