@@ -2,6 +2,7 @@
 """Track class for waypoint management in robotics path following."""
 
 from collections import UserList
+from typing import Sequence
 
 from rox_vectors import Vector
 
@@ -9,7 +10,7 @@ from rox_vectors import Vector
 class Track(UserList):
     """Navigation waypoints collection with path tracking functionality."""
 
-    def __init__(self, waypoints: list[Vector | tuple[float, float]]):
+    def __init__(self, waypoints: Sequence[Vector | tuple[float, float]]):
         """Initialize Track with waypoints as Vector objects or (x, y) tuples."""
         # Convert all waypoints to Vector objects
         converted_waypoints = [

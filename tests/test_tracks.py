@@ -34,7 +34,7 @@ class TestTrackInitialization:
 
     def test_init_with_lists(self):
         """Test automatic conversion from lists to Vectors."""
-        waypoints = [[0, 0], [1, 1], [2, 0]]
+        waypoints = [(0, 0), (1, 1), (2, 0)]
         track = Track(waypoints)
 
         assert len(track) == 3
