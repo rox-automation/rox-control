@@ -18,6 +18,8 @@ from tools.plot import plot_simulation_data
 from tools.simulation import SimulationData, SimulationState, present_results
 from tools.tracks import rectangular_track
 
+WHEELBASE = 5.0  # distance between front and rear wheels in meters
+
 
 def run_pure_pursuit_simulation(
     controller: PurePursuitA, model: BicycleModel, dt: float = 0.01
@@ -96,7 +98,7 @@ def main() -> None:
 
     # Create bicycle model with realistic parameters for larger scale
     model = BicycleModel(
-        wheelbase=2.5,  # 2.5m wheelbase (typical car)
+        wheelbase=WHEELBASE,
         accel=3.0,  # 3 m/s² acceleration
         steering_speed=math.radians(60),  # 60°/s steering rate
         max_steering_angle=math.radians(45),  # 45° max steering
