@@ -2,29 +2,15 @@
 """Track class for waypoint management in robotics path following."""
 
 from collections import UserList
-from typing import Union
 
 from rox_vectors import Vector
 
 
 class Track(UserList):
-    """Navigation waypoints collection with path tracking functionality.
+    """Navigation waypoints collection with path tracking functionality."""
 
-    Inherits from UserList for list-like behavior with indexing support.
-    Uses rox_vectors.Vector for waypoints with full type annotation coverage.
-    """
-
-    def __init__(
-        self, waypoints: list[Union[Vector, tuple[float, float], list[float]]]
-    ):
-        """Initialize Track with waypoints.
-
-        Args:
-            waypoints: List of waypoints as Vector objects, (x, y) tuples, or [x, y] lists
-
-        Raises:
-            ValueError: If fewer than 2 waypoints provided
-        """
+    def __init__(self, waypoints: list[Vector | tuple[float, float]]):
+        """Initialize Track with waypoints as Vector objects or (x, y) tuples."""
         # Convert all waypoints to Vector objects
         converted_waypoints = [
             Vector(*wp) if isinstance(wp, (tuple, list)) else wp for wp in waypoints
@@ -37,14 +23,7 @@ class Track(UserList):
         super().__init__(converted_waypoints)
 
     def find_closest_segment(self, robot_xy: Vector) -> tuple[int, Vector, float]:
-        """Find closest track segment and project robot onto it.
-
-        Args:
-            robot_xy: Current robot position as Vector
-
-        Returns:
-            Tuple of (segment_index, projected_point, distance_along_segment_meters)
-        """
+        """Find closest track segment and project robot position onto it."""
         if len(self.data) < 2:
             raise ValueError("Track must have at least 2 waypoints")
 
