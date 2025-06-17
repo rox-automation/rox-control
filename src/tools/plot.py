@@ -203,11 +203,26 @@ def _plot_animated_data(
         all_y.extend(track_y)
 
     x_range = max(all_x) - min(all_x)
-    y_range = max(all_y) - min(all_y)
-    padding = max(x_range, y_range) * 0.1 + 2.0
 
-    ax_traj.set_xlim(min(all_x) - padding, max(all_x) + padding)
-    ax_traj.set_ylim(min(all_y) - padding, max(all_y) + padding)
+    # Calculate horizontal bounds with margin
+    horizontal_margin = x_range * 0.05 + 1.0  # 5% + 1m minimum
+    x_min = min(all_x) - horizontal_margin
+    x_max = max(all_x) + horizontal_margin
+    x_span = x_max - x_min
+
+    # For animation, we have a 2-column layout, so trajectory plot gets roughly half the figure width
+    # Figure is 15x6, so trajectory plot gets roughly 7.5x6 space
+    # Calculate y limits to use full vertical space while maintaining aspect ratio
+    plot_aspect_ratio = 7.5 / 6.0  # width/height of the trajectory subplot
+    y_span_for_full_height = x_span / plot_aspect_ratio
+
+    # Center the y range around the track, but expand to use full vertical space
+    y_center = (min(all_y) + max(all_y)) / 2
+    y_min = y_center - y_span_for_full_height / 2
+    y_max = y_center + y_span_for_full_height / 2
+
+    ax_traj.set_xlim(x_min, x_max)
+    ax_traj.set_ylim(y_min, y_max)
 
     # Initialize dynamic trajectory elements
     (rear_trace,) = ax_traj.plot(
@@ -454,12 +469,28 @@ def _plot_trajectory(
         track_y = [waypoint.y for waypoint in track.data]
         all_x.extend(track_x)
         all_y.extend(track_y)
-    x_range = max(all_x) - min(all_x)
-    y_range = max(all_y) - min(all_y)
-    padding = max(x_range, y_range) * 0.1 + 1.0  # Minimum 1m padding
 
-    ax.set_xlim(min(all_x) - padding, max(all_x) + padding)
-    ax.set_ylim(min(all_y) - padding, max(all_y) + padding)
+    x_range = max(all_x) - min(all_x)
+
+    # Calculate horizontal bounds with margin
+    horizontal_margin = x_range * 0.05 + 1.0  # 5% + 1m minimum
+    x_min = min(all_x) - horizontal_margin
+    x_max = max(all_x) + horizontal_margin
+    x_span = x_max - x_min
+
+    # For static plot, we have a 2-column layout, so trajectory plot gets roughly half the figure width
+    # Figure is 15x6, so trajectory plot gets roughly 7.5x6 space
+    # Calculate y limits to use full vertical space while maintaining aspect ratio
+    plot_aspect_ratio = 7.5 / 6.0  # width/height of the trajectory subplot
+    y_span_for_full_height = x_span / plot_aspect_ratio
+
+    # Center the y range around the track, but expand to use full vertical space
+    y_center = (min(all_y) + max(all_y)) / 2
+    y_min = y_center - y_span_for_full_height / 2
+    y_max = y_center + y_span_for_full_height / 2
+
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
 
     # Styling
     ax.set_aspect("equal")
