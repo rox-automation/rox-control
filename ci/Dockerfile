@@ -17,6 +17,13 @@ COPY pyproject.toml uv.lock ./
 # Install dependencies in /app
 RUN uv sync --all-extras --no-install-project
 
+# Create a user and cache directory that can be used by any user
+RUN mkdir -p /tmp/cache && chmod 777 /tmp/cache
+ENV UV_CACHE_DIR=/tmp/cache
+
+# Make venv directory writable by any user
+RUN chmod -R 777 /app/.venv
+
 # Set the working directory where code will be mounted
 WORKDIR /workspace
 
