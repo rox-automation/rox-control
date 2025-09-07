@@ -85,20 +85,16 @@ def ci(ctx):
 @task
 def build_package(ctx):
     """
-    Build package in docker container.
+    Build package using uv.
     """
 
     ctx.run("rm -rf dist")
     t_start = time.time()
-    # get script directory
-    script_dir = os.path.dirname(os.path.realpath(__file__))
     try:
-        ctx.run(
-            f"docker run --rm -v {script_dir}:/workspace roxauto/python-ci /scripts/build.sh"
-        )
+        ctx.run("uv build")
     finally:
         t_end = time.time()
-        print(f"CI run took {t_end - t_start:.1f} seconds")
+        print(f"Build took {t_end - t_start:.1f} seconds")
 
 
 @task
