@@ -9,8 +9,8 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from rox_control.tools.bicicle_model import RobotState
 from rox_control.track import Track
-from tools.bicicle_model import RobotState
 
 if TYPE_CHECKING:  # pragma: no cover
     from rox_control.controllers.pure_pursuit_a import ControlOutput

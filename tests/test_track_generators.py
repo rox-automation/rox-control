@@ -4,7 +4,7 @@
 import pytest
 from rox_vectors import Vector
 
-from tools.tracks import generate_track
+from rox_control.tools.tracks import generate_track
 
 
 class TestGenerateTrack:

@@ -17,7 +17,7 @@ Why this repo?
 
 - **Controllers**: `PurePursuitA` - Pure pursuit path tracking controller with lookahead-based steering
 - **Track Management**: `Track` class for waypoint/path management and interpolation
-- **Simulation Tools**: Bicycle kinematics model, visualization, and plotting utilities (in `src/tools/`)
+- **Simulation Tools**: Bicycle kinematics model, visualization, and plotting utilities (optional `[tools]` extra)
 - **Examples**: Ready-to-run demonstrations of controller usage
 
 The package focuses on simplicity and production readiness, unlike educational implementations. Core controllers are packaged separately from simulation/visualization tools.
@@ -26,11 +26,22 @@ The package focuses on simplicity and production readiness, unlike educational i
 
 ### Installation
 
-```bash
+Choose your installation based on your needs:
 
+```bash
+# Production use: Core controllers only (minimal dependencies)
+pip install rox-control
+
+# Development/Research: Include simulation and visualization tools  
+pip install rox-control[tools]
+```
+
+For local development from source:
+
+```bash
 git clone <repository-url>
 cd rox-control
-invoke create-venv  # Creates venv and installs dependencies
+invoke create-venv  # Creates venv and installs all dependencies
 ```
 
 ### Basic usage
@@ -55,17 +66,18 @@ control_output = controller.control(robot_state)
 
 ### Examples
 
-Run the included examples to see the controllers in action:
+Run the included examples to see the controllers in action (requires `[tools]` installation):
 
 ```bash
 python examples/01_basic_simulation.py     # Basic bicycle model simulation
 python examples/02_pure_pursuit_a.py       # Pure pursuit path tracking
 ```
 
-## Repository structure
+## Package Structure
 
-* main package is contained in `src/rox_control`
-* supporting code (simulator, visualisation etc.) are in `src/tools`. These are not included in the package.
+* **Core package**: `src/rox_control/` - Controllers and track management (always available)
+* **Tools package**: `src/rox_control/tools/` - Simulation and visualization tools (optional `[tools]` extra)
+* **Examples**: `examples/` - Ready-to-run demonstrations
 
 
 ## References

@@ -7,7 +7,7 @@ Copyright (c) 2025 ROX Automation - Jev Kuznetsov
 
 import math
 
-from tools.bicicle_model import BicycleModel, RobotState
+from rox_control.tools.bicicle_model import BicycleModel, RobotState
 
 
 class TestBicycleSim:

@@ -31,6 +31,9 @@ requires-python = ">=3.11"
 
 
 [project.optional-dependencies]
+tools = [
+    "matplotlib",
+]
 dev = [
     "pytest",
     "pytest-cov",
@@ -53,7 +56,6 @@ Homepage = "https://github.com/rox-automation/rox-control"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-exclude = ["tools*"]
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0+unknown"
@@ -78,7 +80,7 @@ log_cli_date_format = "%H:%M:%S"
 [tool.coverage.run]
 omit = [
     "tests/*",
-    "src/tools/plot.py"
+    "src/rox_control/tools/plot.py"
 ]
 
 #------------------ruff configuration----------------

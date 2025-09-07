@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+- **Dependency architecture refactored**: Tools moved to optional subpackage for clean separation
+  - Moved `src/tools/` to `src/rox_control/tools/` as proper subpackage 
+  - Added `[tools]` optional dependency with matplotlib for visualization tools
+  - Core controllers remain minimal with only rox-vectors and numpy dependencies
+  - Conditional imports with graceful fallback when matplotlib unavailable
+  - Updated all examples, tests, and imports to new `rox_control.tools` structure
+  - Package structure now supports both minimal (`pip install rox-control`) and full (`pip install rox-control[tools]`) installations
+  - Documentation updated with new installation options and import patterns
+
 ## [0.3.0] - 2025-09-07
 
 ### Changed

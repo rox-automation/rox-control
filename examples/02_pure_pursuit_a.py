@@ -13,10 +13,14 @@ import time
 from dataclasses import asdict
 
 from rox_control.controllers import PurePursuitA
-from tools.bicicle_model import BicycleModel, RobotState
-from tools.plot import plot_simulation_data
-from tools.simulation import SimulationData, SimulationState, present_results
-from tools.tracks import rectangular_track
+from rox_control.tools.bicicle_model import BicycleModel, RobotState
+from rox_control.tools.plot import plot_simulation_data
+from rox_control.tools.simulation import (
+    SimulationData,
+    SimulationState,
+    present_results,
+)
+from rox_control.tools.tracks import rectangular_track
 
 WHEELBASE = 5.0  # distance between front and rear wheels in meters
 

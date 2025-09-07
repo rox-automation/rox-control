@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.11"
 
 [[package]]
@@ -661,11 +661,15 @@ dev = [
     { name = "pytest-cov" },
     { name = "ruff" },
 ]
+tools = [
+    { name = "matplotlib" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "invoke", marker = "extra == 'dev'" },
     { name = "matplotlib", marker = "extra == 'dev'" },
+    { name = "matplotlib", marker = "extra == 'tools'" },
     { name = "mypy", marker = "extra == 'dev'" },
     { name = "numpy" },
     { name = "pre-commit", marker = "extra == 'dev'" },
@@ -674,7 +678,7 @@ requires-dist = [
     { name = "rox-vectors" },
     { name = "ruff", marker = "extra == 'dev'" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["tools", "dev"]
 
 [[package]]
 name = "rox-vectors"

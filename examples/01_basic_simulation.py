@@ -12,8 +12,8 @@ import math
 import time
 from dataclasses import dataclass
 
-from tools.bicicle_model import BicycleModel, RobotState
-from tools.simulation import present_results
+from rox_control.tools.bicicle_model import BicycleModel, RobotState
+from rox_control.tools.simulation import present_results
 
 
 @dataclass
@@ -93,8 +93,8 @@ def main() -> None:
     try:
         import matplotlib.pyplot as plt
 
-        from tools.plot import plot_simulation_data
-        from tools.simulation import SimulationData, SimulationState
+        from rox_control.tools.plot import plot_simulation_data
+        from rox_control.tools.simulation import SimulationData, SimulationState
 
         # Convert RobotState list to SimulationState list (no debug data for basic simulation)
         simulation_states = [

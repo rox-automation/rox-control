@@ -9,7 +9,7 @@ from rox_vectors import Vector
 from rox_control.track import Track
 
 if TYPE_CHECKING:  # pragma: no cover
-    from tools.bicicle_model import RobotState
+    from rox_control.tools.bicicle_model import RobotState
 
 
 @dataclass
