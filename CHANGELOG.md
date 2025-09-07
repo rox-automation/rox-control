@@ -5,11 +5,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-09-07
+
 ### Changed
+- **Build system modernization**: Migrated from Docker-based build to native `uv` tooling
+  - `build_package` task now uses `uv build` for faster, dependency-free building
+  - `release` task enhanced with CI pipeline integration and `uv publish` for PyPI uploads
+  - License format updated to modern SPDX expression (`license = "MIT"`)
+  - Package discovery configured to exclude `tools*` from wheel distribution
 - **Track class decoupling**: Move `get_lookahead_point()` method from Track class to PurePursuitA controller
-  - Track class now only contains generally useful path tracking methods (`find_closest_segment()`)
+  - Track class now only contains generally useful path tracking methods (`find_closest_segment()`)  
   - Pure pursuit specific lookahead logic encapsulated in controller for better reusability
   - Enables Track reuse for other controllers like Stanley without coupling to pure pursuit concepts
+  - File renamed from `tracks.py` to `track.py` for singular naming consistency
+- **Type annotation improvements**: Enhanced type hints across controllers and simulation modules
+  - Animation control methods now have complete type annotations
+  - Docstring formatting standardized according to project guidelines
+
+### Added
+- **Local CI infrastructure**: Docker-based continuous integration for consistent testing
+  - `ci/Dockerfile` and `ci/scripts/run-ci.sh` for containerized CI execution
+  - `invoke ci` task for running full CI pipeline locally
+  - Pre-commit hook integration with pytest for automated testing
+
+### Fixed
+- **Print statement cleanup**: Removed debugging print statements from simulation code
+- **Test stability**: Improved controller test reliability and reduced test complexity
+- **Subsampling parameters**: Enhanced `print_states_table` with configurable row limiting
 
 ## [0.2.0] - 2025-06-17
 
