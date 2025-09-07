@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-09-07
+
 ### Changed
 - **Dependency architecture refactored**: Tools moved to optional subpackage for clean separation
   - Moved `src/tools/` to `src/rox_control/tools/` as proper subpackage 
