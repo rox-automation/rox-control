@@ -99,13 +99,21 @@ def build_package(ctx):
 
 @task
 def release(ctx):
-    """publish package to pypi"""
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-
+    """Run CI, build package, and publish to PyPI using uv."""
     token = os.getenv("PYPI_TOKEN")
     if not token:
         raise ValueError("PYPI_TOKEN environment variable is not set")
 
-    ctx.run(
-        f"docker run --rm -e PYPI_TOKEN={token} -v {script_dir}:/workspace roxauto/python-ci /scripts/publish.sh"
-    )
+    t_start = time.time()
+    try:
+        print("Running CI pipeline...")
+        ctx.run("invoke ci")
+
+        print("Building package...")
+        ctx.run("invoke build-package")
+
+        print("Publishing to PyPI...")
+        ctx.run(f"uv publish --token {token}")
+    finally:
+        t_end = time.time()
+        print(f"Release took {t_end - t_start:.1f} seconds")
