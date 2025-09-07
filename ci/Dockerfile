@@ -14,6 +14,10 @@ WORKDIR /app
 # Copy dependency files first (for better caching)
 COPY pyproject.toml uv.lock ./
 
+# Copy source files needed for package build
+COPY src/ src/
+COPY README.md ./
+
 # Install dependencies in /app
 RUN uv sync --all-extras
 
