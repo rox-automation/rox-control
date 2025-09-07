@@ -45,7 +45,7 @@ dev = [
 
 
 [project.urls]
-Homepage = "https://gitlab.com/rox-automation/rox-control"
+Homepage = "https://github.com/rox-automation/rox-control"
 
 # [project.scripts]
 # rox_control = "rox_control.cli:cli"
