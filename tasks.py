@@ -73,7 +73,10 @@ def ci(ctx):
     # get script directory
     script_dir = os.path.dirname(os.path.realpath(__file__))
     try:
-        ctx.run(f"docker run --rm -v {script_dir}:/workspace roxauto/python-ci")
+        # Build the CI image from project root using ci/Dockerfile
+        ctx.run(f"docker build -t rox-control-ci -f {script_dir}/ci/Dockerfile {script_dir}")
+        # Run CI in container with pre-installed venv
+        ctx.run(f"docker run --rm -e UV_PROJECT_ENVIRONMENT=/app/.venv -v {script_dir}:/workspace rox-control-ci")
     finally:
         t_end = time.time()
         print(f"CI run took {t_end - t_start:.1f} seconds")
