@@ -15,7 +15,7 @@ description = "Controllers for path following"
 authors = [
     {name = "ROX Automation", email = "jev.kuznetsov@gmail.com"},
 ]
-license = {text = "MIT"}
+license = "MIT"
 readme = "README.md"
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -50,6 +50,10 @@ Homepage = "https://gitlab.com/rox-automation/rox-control"
 # [project.scripts]
 # rox_control = "rox_control.cli:cli"
 
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tools*"]
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0+unknown"
