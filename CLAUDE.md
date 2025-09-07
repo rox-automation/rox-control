@@ -26,6 +26,12 @@ invoke ci
 # Build package
 invoke build_package
 
+# Generate UML diagrams from source code
+invoke uml
+
+# Clean untracked files (interactive)
+invoke clean
+
 # Release to PyPI (requires proper git tag)
 invoke release
 ```
