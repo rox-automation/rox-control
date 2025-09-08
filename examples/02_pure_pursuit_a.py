@@ -99,9 +99,9 @@ def main() -> None:
     model = BicycleModel(
         wheelbase=WHEELBASE,
         accel=3.0,  # 3 m/s² acceleration
-        steering_speed=math.radians(60),  # 60°/s steering rate
+        steering_speed=math.radians(15),  # 15°/s steering rate
         max_steering_angle=math.radians(45),  # 45° max steering
-        max_velocity=15.0,  # 15 m/s max velocity
+        max_velocity=2.0,  # 2 m/s max velocity
     )
 
     # Create pure pursuit controller with scaled parameters
